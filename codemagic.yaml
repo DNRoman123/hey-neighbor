@@ -1,0 +1,109 @@
+workflows:
+  ios-appstore:
+    name: Hey Neighbor iOS - App Store
+    # Cloud macOS machine with the latest Xcode. No local Mac needed.
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      groups:
+        # Codemagic env group that holds APP_STORE_CONNECT_PRIVATE_KEY (the .p8 contents, secure).
+        - appstore
+      vars:
+        BUNDLE_ID: "app.lovable.heyneigh"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
+        EXPORT_OPTIONS_PLIST: "/Users/builder/export_options.plist"
+        APP_STORE_APPLE_ID: 19533586859
+        APP_STORE_CONNECT_ISSUER_ID: "55d47965-4304-4a55-947b-0eed00ce7e64"
+        APP_STORE_CONNECT_KEY_IDENTIFIER: "QVLHW64XA4"
+        ASC_PRIVATE_KEY_PATH: "/tmp/AuthKey_QVLHW64XA4.p8"
+        CERTIFICATE_PRIVATE_KEY_PATH: "/tmp/ios_distribution_private_key.pem"
+      node: 22
+      xcode: latest
+      cocoapods: default
+
+    scripts:
+      - name: Install dependencies
+        script: npm ci || npm install
+      - name: Build web bundle
+        script: npm run build
+      - name: Sync Capacitor iOS project
+        script: npx cap sync ios
+      - name: Install CocoaPods (if the project uses them)
+        script: |
+          if [ -f ios/App/Podfile ]; then
+            cd ios/App && pod install
+          fi
+      - name: Set build number
+        script: |
+          cd ios/App
+          # A monotonically increasing UTC timestamp avoids an unnecessary API
+          # request before signing credentials have been validated.
+          agvtool new-version -all "$(date -u +%y%m%d%H%M)"
+      - name: Set up signing
+        script: |
+          set -euo pipefail
+
+          if [ -z "${APP_STORE_CONNECT_PRIVATE_KEY:-}" ]; then
+            echo "Missing APP_STORE_CONNECT_PRIVATE_KEY. In Codemagic, add the complete AuthKey_QVLHW64XA4.p8 contents to the appstore environment-variable group and make it Secure."
+            exit 1
+          fi
+
+          # Accept both a normal multiline .p8 value and a value pasted with
+          # escaped newlines, then give the CLI an explicit file path. This
+          # avoids Codemagic treating a multiline key as an empty argument.
+          printf '%b' "$APP_STORE_CONNECT_PRIVATE_KEY" > "$ASC_PRIVATE_KEY_PATH"
+          chmod 600 "$ASC_PRIVATE_KEY_PATH"
+          if ! grep -q "BEGIN PRIVATE KEY" "$ASC_PRIVATE_KEY_PATH"; then
+            echo "APP_STORE_CONNECT_PRIVATE_KEY is not the contents of the Apple .p8 file."
+            exit 1
+          fi
+
+          keychain initialize
+          # Apple needs a separate RSA private key for the distribution
+          # certificate. It is generated only for this ephemeral build and is
+          # bundled into the .p12 produced by fetch-signing-files.
+          openssl genrsa -out "$CERTIFICATE_PRIVATE_KEY_PATH" 2048
+          chmod 600 "$CERTIFICATE_PRIVATE_KEY_PATH"
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --platform IOS \
+            --strict-match-identifier \
+            --private-key "@file:$ASC_PRIVATE_KEY_PATH" \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+            --certificate-key "@file:$CERTIFICATE_PRIVATE_KEY_PATH" \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles \
+            --project "$XCODE_PROJECT" \
+            --archive-method app-store \
+            --export-options-plist "$EXPORT_OPTIONS_PLIST" \
+            --code-signing-setup-verbose-logging
+      - name: Build .ipa
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --config Release \
+            --export-options-plist "$EXPORT_OPTIONS_PLIST"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        # Apple allows only one build per train in beta review at a time, so
+        # auto-submission is off: the build still lands in TestFlight and can be
+        # submitted manually from App Store Connect when the previous one clears.
+        submit_to_testflight: false
+        submit_to_app_store: false
+
+      email:
+        recipients:
+          - davidnroman@hotmail.com
+        notify:
+          success: true
+          failure: true

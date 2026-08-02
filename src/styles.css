@@ -1,0 +1,98 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Hey Neighbor design system.
+ * Warm community green, generous rounding, soft cards.
+ * All colors use oklch and are exposed as Tailwind utilities via @theme inline.
+ */
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-bubble-them: var(--bubble-them);
+  --color-bubble-them-foreground: var(--bubble-them-foreground);
+  --color-bubble-me: var(--bubble-me);
+  --color-bubble-me-foreground: var(--bubble-me-foreground);
+  --shadow-card: 0 1px 2px oklch(0.42 0.11 152 / 6%), 0 8px 24px -12px oklch(0.42 0.11 152 / 18%);
+  --shadow-float: 0 12px 36px -14px oklch(0.42 0.11 152 / 32%);
+}
+
+:root {
+  --radius: 0.875rem;
+  --background: oklch(0.995 0.004 130);
+  --foreground: oklch(0.23 0.02 150);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.23 0.02 150);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.23 0.02 150);
+  --primary: oklch(0.45 0.107 152);
+  --primary-foreground: oklch(0.99 0.005 140);
+  --primary-deep: oklch(0.37 0.09 152);
+  --primary-soft: oklch(0.95 0.032 148);
+  --secondary: oklch(0.96 0.014 145);
+  --secondary-foreground: oklch(0.37 0.09 152);
+  --muted: oklch(0.965 0.008 145);
+  --muted-foreground: oklch(0.53 0.02 150);
+  --accent: oklch(0.95 0.032 148);
+  --accent-foreground: oklch(0.37 0.09 152);
+  --destructive: oklch(0.57 0.2 25);
+  --destructive-foreground: oklch(0.99 0.005 140);
+  --border: oklch(0.91 0.012 145);
+  --input: oklch(0.91 0.012 145);
+  --ring: oklch(0.45 0.107 152);
+  --bubble-them: oklch(0.955 0.03 148);
+  --bubble-them-foreground: oklch(0.25 0.03 150);
+  --bubble-me: oklch(0.93 0.045 148);
+  --bubble-me-foreground: oklch(0.25 0.03 150);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@utility field-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-foreground);
+}

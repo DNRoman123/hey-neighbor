@@ -1,0 +1,2 @@
+REVOKE ALL ON FUNCTION public.nearby_listings(double precision, double precision, numeric) FROM anon, public;
+GRANT EXECUTE ON FUNCTION public.nearby_listings(double precision, double precision, numeric) TO authenticated, service_role;
