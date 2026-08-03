@@ -7,9 +7,10 @@ workflows:
     integrations:
       app_store_connect: HeyNeighborASC
     environment:
-      # No environment-variable groups are required: the iOS Google client ID is
-      # read from the deployed public config endpoint during the build. (A
-      # reference to a group that does not exist aborts the build before it starts.)
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: app.lovable.heyneigh
+      # The iOS Google client ID is read from the deployed public config endpoint.
       vars:
         BUNDLE_ID: "app.lovable.heyneigh"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
@@ -71,15 +72,6 @@ workflows:
       - name: Set up signing
         script: |
           set -euo pipefail
-          # Do not use environment.ios_signing here: it aborts the workflow
-          # before scripts run when no existing profile is cached. Fetch the
-          # uploaded distribution identity and create the matching App Store
-          # profile through the configured App Store Connect integration.
-          keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-          keychain add-certificates
           xcode-project use-profiles \
             --project "$XCODE_PROJECT" \
             --archive-method app-store \
