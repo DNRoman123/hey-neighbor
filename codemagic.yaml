@@ -72,12 +72,8 @@ workflows:
       - name: Set up signing
         script: |
           set -e
-          # Fetch the exact App Store profile from Apple on every run. There
-          # are valid profiles for this bundle id, but they were not available
-          # under the Codemagic reference previously used by the workflow.
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --strict-match-identifier
+          # The ios_signing environment block fetches and installs the matching
+          # App Store profile and uploaded certificate before scripts run.
           xcode-project use-profiles \
             --project "$XCODE_PROJECT" \
             --archive-method app-store \
