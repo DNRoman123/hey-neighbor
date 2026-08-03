@@ -203,9 +203,34 @@ function ChatThread() {
         }
       />
 
-
+      {conversation.data?.listing && (
+        <button
+          type="button"
+          onClick={() =>
+            navigate({ to: "/item/$id", params: { id: conversation.data!.listing!.id } })
+          }
+          className="mx-4 mb-3 flex w-[calc(100%-2rem)] items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left shadow-card"
+        >
+          <ListingPhoto
+            path={conversation.data.listing.photo_url}
+            alt={conversation.data.listing.title}
+            className="size-14 shrink-0 rounded-xl object-cover"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-bold">{conversation.data.listing.title}</p>
+            <p className="truncate text-[12px] font-semibold text-muted-foreground">
+              {t(conversation.data.listing.category ?? "")}
+              {conversation.data.listing.condition
+                ? ` · ${t(conversation.data.listing.condition)}`
+                : ""}
+            </p>
+          </div>
+          <span className="shrink-0 text-[12px] font-bold text-primary">{t("View item")}</span>
+        </button>
+      )}
 
       <div className="flex-1 space-y-3 px-4">
+
         <div className="flex items-start gap-2 rounded-2xl bg-primary-soft p-3">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2.4} />
           <p className="text-[12px] font-semibold leading-snug text-primary-deep">

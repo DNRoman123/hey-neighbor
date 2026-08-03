@@ -7,7 +7,9 @@ import { Logo } from "@/components/Logo";
 export function StatusBar({ tone = "dark" }: { tone?: "dark" | "light" }) {
   const color = tone === "light" ? "text-primary-foreground" : "text-foreground";
   return (
-    <div className={`flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold ${color}`}>
+    <div
+      className={`flex items-center justify-between px-6 pt-3 pb-1 text-[13px] font-semibold ${color}`}
+    >
       <span className="text-[12px] font-semibold tracking-tight">Enjoy Sharing</span>
       <LanguageToggle tone={tone === "light" ? "light" : "default"} />
       <div className="flex items-center gap-1.5">
@@ -18,7 +20,6 @@ export function StatusBar({ tone = "dark" }: { tone?: "dark" | "light" }) {
     </div>
   );
 }
-
 
 export function PhoneShell({
   children,
@@ -32,7 +33,7 @@ export function PhoneShell({
   className?: string;
 }) {
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col bg-background">
+    <div className="mx-auto flex min-h-screen w-full max-w-[430px] min-w-0 flex-col overflow-x-hidden bg-background">
       <StatusBar tone={statusTone} />
       <div className="flex justify-center pt-3 pb-1">
         <Logo size="sm" tone={statusTone === "light" ? "light" : "default"} />
@@ -51,4 +52,3 @@ export function PhoneShell({
     </div>
   );
 }
-

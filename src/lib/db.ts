@@ -315,12 +315,21 @@ export async function fetchConversation(conversationId: string, userId: string) 
   if (error) throw error;
   if (!data) return null;
   const otherId = data.owner_id === userId ? data.receiver_id : data.owner_id;
-  const { data: person } = await supabase
-    .from("profiles")
-    .select("id, first_name, last_name, avatar_url")
-    .eq("id", otherId)
-    .maybeSingle();
-  return { ...data, person };
+  const [{ data: person }, { data: listing }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, first_name, last_name, avatar_url")
+      .eq("id", otherId)
+      .maybeSingle(),
+    data.listing_id
+      ? supabase
+          .from("listings")
+          .select("id, title, category, condition, photo_url")
+          .eq("id", data.listing_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  return { ...data, person, listing };
 }
 
 export type ChatLock = { locked: boolean; claimId: string | null };
