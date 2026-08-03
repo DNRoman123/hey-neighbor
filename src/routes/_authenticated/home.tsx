@@ -16,6 +16,8 @@ import { useT } from "@/lib/i18n";
 import { PhoneShell } from "@/components/PhoneShell";
 import { BottomNav } from "@/components/BottomNav";
 import { ListingPhoto } from "@/components/ListingPhoto";
+import { NeighborhoodMap } from "@/components/NeighborhoodMap";
+
 import { useUserId } from "@/hooks/useAuth";
 import {
   FOOD_DISCLAIMER,
@@ -115,25 +117,35 @@ function HomeScreen() {
         </div>
 
         <div className="px-4">
-          <div className="relative flex h-44 items-center justify-center overflow-hidden rounded-2xl bg-secondary">
-            <div
-              className="absolute inset-0 opacity-40"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
-                backgroundSize: "34px 34px",
-              }}
-              aria-hidden
+          {lat != null && lng != null ? (
+            <NeighborhoodMap
+              lat={lat}
+              lng={lng}
+              radiusKm={radiusKm}
+              caption={t("Matching from {source}").replace("{source}", source)}
             />
-            <div className="absolute size-32 rounded-full bg-primary-soft" aria-hidden />
-            <span className="relative flex size-12 items-center justify-center rounded-full bg-primary shadow-float">
-              <HomeIcon className="size-6 text-primary-foreground" strokeWidth={2.4} />
-            </span>
-            <p className="absolute bottom-3 rounded-full bg-card/90 px-3 py-1 text-[11px] font-semibold text-primary-deep">
-              {t("Matching from {source}").replace("{source}", source)}
-            </p>
-          </div>
+          ) : (
+            <div className="relative flex h-44 items-center justify-center overflow-hidden rounded-2xl bg-secondary">
+              <div
+                className="absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
+                  backgroundSize: "34px 34px",
+                }}
+                aria-hidden
+              />
+              <div className="absolute size-32 rounded-full bg-primary-soft" aria-hidden />
+              <span className="relative flex size-12 items-center justify-center rounded-full bg-primary shadow-float">
+                <HomeIcon className="size-6 text-primary-foreground" strokeWidth={2.4} />
+              </span>
+              <p className="absolute bottom-3 rounded-full bg-card/90 px-3 py-1 text-[11px] font-semibold text-primary-deep">
+                {t("Matching from {source}").replace("{source}", source)}
+              </p>
+            </div>
+          )}
         </div>
+
 
         <div className="px-5 pt-6 pb-3">
           <h2 className="text-sm font-extrabold">{t("Items from your neighbors")}</h2>

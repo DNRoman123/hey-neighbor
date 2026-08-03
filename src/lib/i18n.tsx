@@ -21,12 +21,9 @@ const es: Dict = {
   // Auth
   "Share anything anytime with your closest neighbors":
     "Comparte cualquier cosa en cualquier momento con tus vecinos más cercanos",
-  "Share and find anything in your neighborhood":
-    "Comparte y encuentra de todo en tu vecindario",
-  "Share food, clothing, furniture and more...":
-    "Comparte comida, ropa, muebles y más...",
-  "All items deserve a second home.":
-    "Todos los artículos merecen una segunda vida.",
+  "Share and find anything in your neighborhood": "Comparte y encuentra de todo en tu vecindario",
+  "Share food, clothing, furniture and more...": "Comparte comida, ropa, muebles y más...",
+  "All items deserve a second home.": "Todos los artículos merecen una segunda vida.",
   "Log In": "Iniciar sesión",
   "Sign Up": "Registrarse",
   Username: "Nombre de usuario",
@@ -48,6 +45,19 @@ const es: Dict = {
   "Check your details": "Revisa tus datos",
   "Google sign-in failed. Please try again.":
     "No se pudo iniciar sesión con Google. Inténtalo de nuevo.",
+  "Forgot your password?": "¿Olvidaste tu contraseña?",
+  "Reset your password": "Restablece tu contraseña",
+  "Enter your email and we'll send you a secure reset link.":
+    "Introduce tu correo y te enviaremos un enlace seguro.",
+  "Send reset link": "Enviar enlace",
+  "Password reset email sent. Check your inbox.":
+    "Correo de restablecimiento enviado. Revisa tu bandeja de entrada.",
+  "Choose a new password": "Elige una contraseña nueva",
+  "Enter and confirm your new password.": "Introduce y confirma tu nueva contraseña.",
+  "Update password": "Actualizar contraseña",
+  "Your password has been updated.": "Tu contraseña se ha actualizado.",
+  "This reset link is invalid or has expired. Request a new one.":
+    "Este enlace no es válido o ha caducado. Solicita uno nuevo.",
 
   // Verify
   "Verify your email": "Verifica tu correo",
@@ -69,11 +79,12 @@ const es: Dict = {
   "Best before": "Consumir antes de",
   away: "de distancia",
   "Loading nearby items…": "Cargando artículos cercanos…",
-  "Edit": "Editar",
+  Edit: "Editar",
   "Edit item": "Editar artículo",
   "Update the details anytime": "Actualiza los detalles en cualquier momento",
   "Your changes are saved.": "Tus cambios se han guardado.",
-  "Could not save those changes. Please try again.": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+  "Could not save those changes. Please try again.":
+    "No se pudieron guardar los cambios. Inténtalo de nuevo.",
   "You can only edit your own items.": "Solo puedes editar tus propios artículos.",
   "Loading…": "Cargando…",
   "Turn on location": "Activar ubicación",
@@ -120,8 +131,7 @@ const es: Dict = {
   "Could not accept this item. Please try again.":
     "No se pudo aceptar este artículo. Inténtalo de nuevo.",
   "Could not open the chat.": "No se pudo abrir el chat.",
-  "Thanks — our team will review this listing.":
-    "Gracias — nuestro equipo revisará este anuncio.",
+  "Thanks — our team will review this listing.": "Gracias — nuestro equipo revisará este anuncio.",
   "Could not send that report.": "No se pudo enviar el reporte.",
   "This item is no longer available.": "Este artículo ya no está disponible.",
   "Back to nearby items": "Volver a los artículos cercanos",
@@ -172,8 +182,7 @@ const es: Dict = {
 
   // Pay
   Payment: "Pago",
-  "You've used your 2 free claims this month.":
-    "Ya usaste tus 2 reclamaciones gratis de este mes.",
+  "You've used your 2 free claims this month.": "Ya usaste tus 2 reclamaciones gratis de este mes.",
   "Free claims used": "Reclamaciones gratis usadas",
   "2 free claims per month": "2 reclamaciones gratis por mes",
 
@@ -196,13 +205,45 @@ const es: Dict = {
   "Could not save your profile.": "No se pudo guardar tu perfil.",
   "Photo updated.": "Foto actualizada.",
   "Could not upload that photo.": "No se pudo subir esa foto.",
-  "Location is not available on this device.": "La ubicación no está disponible en este dispositivo.",
-  "Home location saved for 1 km matching.":
-    "Ubicación guardada para coincidencias de 1 km.",
+  "Location is not available on this device.":
+    "La ubicación no está disponible en este dispositivo.",
+  "Home location saved for 1 km matching.": "Ubicación guardada para coincidencias de 1 km.",
   "Could not save your location.": "No se pudo guardar tu ubicación.",
   "Location permission denied.": "Permiso de ubicación denegado.",
   "Log out": "Cerrar sesión",
   "Sign out": "Cerrar sesión",
+
+  // Settings & recovery
+  Settings: "Ajustes",
+  "Only shared with neighbors you agree to meet.":
+    "Solo se comparte con los vecinos con los que acuerdas encontrarte.",
+  "Account recovery": "Recuperación de cuenta",
+  "Choose how we help you back in if you forget your password.":
+    "Elige cómo te ayudamos a entrar si olvidas tu contraseña.",
+  Phone: "Teléfono",
+  "Email and phone": "Correo y teléfono",
+  "We send a reset link to your recovery email.":
+    "Enviamos un enlace de restablecimiento a tu correo de recuperación.",
+  "We contact you on your recovery phone number.":
+    "Te contactamos en tu número de teléfono de recuperación.",
+  "Use whichever is available when you need to get back in.":
+    "Usa el que esté disponible cuando necesites volver a entrar.",
+  "Recovery email": "Correo de recuperación",
+  "Recovery phone": "Teléfono de recuperación",
+  "Settings saved.": "Ajustes guardados.",
+  "Could not save your settings.": "No se pudieron guardar tus ajustes.",
+  "Add a recovery phone number first.": "Añade primero un teléfono de recuperación.",
+  "Add a recovery email first.": "Añade primero un correo de recuperación.",
+  "Enter a valid phone number": "Introduce un número de teléfono válido",
+  "Phone number is too long": "El número de teléfono es demasiado largo",
+  "Enter a valid recovery email": "Introduce un correo de recuperación válido",
+  "Test your recovery": "Prueba tu recuperación",
+  "Send a password reset link to": "Enviar un enlace de restablecimiento a",
+  "Password reset link sent.": "Enlace de restablecimiento enviado.",
+  "Could not send the reset link.": "No se pudo enviar el enlace.",
+  "Settings & recovery": "Ajustes y recuperación",
+
+
 
   // Safety & blocking
   "Please remove offensive or sexual language before continuing.":
@@ -235,7 +276,7 @@ const es: Dict = {
   "Admin dashboard": "Panel de administración",
   "Edit profile": "Editar perfil",
   "Not set": "No establecido",
-  "of": "de",
+  of: "de",
   "free claims used this month. Free claims reset on the 1st; extra claims cost €1.00 each.":
     "reclamaciones gratis usadas este mes. Las reclamaciones gratis se reinician el día 1; cada reclamación extra cuesta 1,00 €.",
   "Matching radius": "Radio de coincidencia",
@@ -247,15 +288,18 @@ const es: Dict = {
   "The app can't force a Lovable push directly — it has to be triggered from the Lovable editor. Follow these steps to push the latest code to GitHub before building in Codemagic.":
     "La app no puede forzar la sincronización de Lovable directamente: hay que hacerlo desde el editor de Lovable. Sigue estos pasos para enviar el código más reciente a GitHub antes de compilar en Codemagic.",
   "Open the Lovable editor for this project.": "Abre el editor de Lovable de este proyecto.",
-  "Click the Plus (+) menu in the chat input (bottom-left).": "Haz clic en el menú Plus (+) del campo de chat (abajo a la izquierda).",
+  "Click the Plus (+) menu in the chat input (bottom-left).":
+    "Haz clic en el menú Plus (+) del campo de chat (abajo a la izquierda).",
   "Choose GitHub → Manage project.": "Elige GitHub → Gestionar proyecto.",
-  "Lovable will push the latest code to the connected repo automatically.": "Lovable enviará automáticamente el código más reciente al repositorio conectado.",
-  "Then go to Codemagic and trigger the 'ios-appstore' build workflow.": "Luego ve a Codemagic y activa el flujo de trabajo 'ios-appstore'.",
+  "Lovable will push the latest code to the connected repo automatically.":
+    "Lovable enviará automáticamente el código más reciente al repositorio conectado.",
+  "Then go to Codemagic and trigger the 'ios-appstore' build workflow.":
+    "Luego ve a Codemagic y activa el flujo de trabajo 'ios-appstore'.",
   "Open Lovable": "Abrir Lovable",
   "Open GitHub repo": "Abrir repositorio de GitHub",
   "Open Codemagic": "Abrir Codemagic",
   "Copy steps": "Copiar pasos",
-  "Copied": "Copiado",
+  Copied: "Copiado",
   "Sync steps copied to clipboard.": "Pasos de sincronización copiados al portapapeles.",
   "Could not copy steps.": "No se pudieron copiar los pasos.",
   "Be kind, be safe": "Sé amable, sé seguro",
@@ -269,7 +313,8 @@ const es: Dict = {
   "Message not sent. Please try again.": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
   "Could not send that photo.": "No se pudo enviar esa foto.",
   "Be kind, be safe.": "Sé amable, sé seguro.",
-  "Never share personal or payment information.": "Nunca compartas información personal ni de pago.",
+  "Never share personal or payment information.":
+    "Nunca compartas información personal ni de pago.",
   "Loading messages…": "Cargando mensajes…",
   "Chat with a neighbor": "Chatear con un vecino",
   "Chat with": "Chatear con",
@@ -301,17 +346,23 @@ const es: Dict = {
 
   // Share / Listings / Pay
   "Give your item a name": "Dale un nombre a tu artículo",
-  "A best before date is required for food items": "Se requiere una fecha de caducidad para los alimentos",
-  "Please confirm the food is unopened and shop-packaged": "Confirma que el alimento está sin abrir y envasado de fábrica",
+  "A best before date is required for food items":
+    "Se requiere una fecha de caducidad para los alimentos",
+  "Please confirm the food is unopened and shop-packaged":
+    "Confirma que el alimento está sin abrir y envasado de fábrica",
   "Keep the description under 300 characters": "Mantén la descripción en menos de 300 caracteres",
-  "Only unopened packaged food may be listed.": "Solo se pueden publicar alimentos envasados sin abrir.",
-  "Make sure items are clean, usable and safe to pass on.": "Asegúrate de que los artículos estén limpios, utilizables y sean seguros para compartir.",
+  "Only unopened packaged food may be listed.":
+    "Solo se pueden publicar alimentos envasados sin abrir.",
+  "Make sure items are clean, usable and safe to pass on.":
+    "Asegúrate de que los artículos estén limpios, utilizables y sean seguros para compartir.",
   "Item preview": "Vista previa del artículo",
   "Remove photo": "Quitar foto",
   "Add a photo": "Añadir una foto",
   "What is it?": "¿Qué es?",
-  "e.g. Unopened pasta, small jacket, desk chair": "p. ej. Pasta sin abrir, chaqueta pequeña, silla de escritorio",
-  "Size, brand, condition, or why you're passing it on.": "Tamaño, marca, estado, o por qué lo estás compartiendo.",
+  "e.g. Unopened pasta, small jacket, desk chair":
+    "p. ej. Pasta sin abrir, chaqueta pequeña, silla de escritorio",
+  "Size, brand, condition, or why you're passing it on.":
+    "Tamaño, marca, estado, o por qué lo estás compartiendo.",
   "Best Before": "Fecha de caducidad",
   "(required for food)": "(requerido para alimentos)",
   "Pickup area": "Zona de recogida",
@@ -322,21 +373,24 @@ const es: Dict = {
   "Use my current location for 1 km matching. Your exact coordinates are never shown to neighbors — only the distance.":
     "Usar mi ubicación actual para coincidencias de 1 km. Tus coordenadas exactas nunca se muestran a los vecinos — solo la distancia.",
   "Publish item": "Publicar artículo",
-  "Your item is live for neighbors nearby.": "Tu artículo ya está disponible para los vecinos cercanos.",
-  "Could not publish that item. Please try again.": "No se pudo publicar ese artículo. Inténtalo de nuevo.",
+  "Your item is live for neighbors nearby.":
+    "Tu artículo ya está disponible para los vecinos cercanos.",
+  "Could not publish that item. Please try again.":
+    "No se pudo publicar ese artículo. Inténtalo de nuevo.",
 
   "free claims used this month": "reclamaciones gratis usadas este mes",
   "Sharing is always free.": "Compartir siempre es gratis.",
-  "Sharing is always free. As a receiver you get": "Compartir siempre es gratis. Como receptor tienes",
+  "Sharing is always free. As a receiver you get":
+    "Compartir siempre es gratis. Como receptor tienes",
   "free claims per month": "reclamaciones gratis al mes",
-  "left": "restantes",
+  left: "restantes",
   "you've used them all": "ya las has usado todas",
   "After that it's €1.00 per extra claim. A claim only counts once both neighbors agree.":
     "Después de eso cuesta €1.00 por reclamación extra. Una reclamación solo cuenta cuando ambos vecinos están de acuerdo.",
   "Hey Neighbor is a community sharing app that connects you with neighbors within a 1 km radius. Give away items you no longer need or discover free items from people nearby, including unopened packaged food and household essentials. Chat securely to arrange convenient pickups, reduce waste, and strengthen your local community. Receiving items is free for your first 2 transactions each month. After that, each additional transaction is just €1. Share more, waste less, and make a positive impact—right in your own neighborhood.":
     "Hey Neighbor es una app de comunidad para compartir que te conecta con vecinos a menos de 1 km de distancia. Regala lo que ya no necesitas o descubre artículos gratis de personas cercanas, incluyendo alimentos envasados sin abrir y artículos esenciales del hogar. Chatea de forma segura para coordinar recogidas convenientes, reducir desperdicios y fortalecer tu comunidad local. Recibir artículos es gratis en tus primeras 2 transacciones cada mes. Después de eso, cada transacción adicional cuesta 1 €. Comparte más, desperdicia menos y genera un impacto positivo — justo en tu propio vecindario.",
   "1 km": "1 km",
-  "radius": "radio",
+  radius: "radio",
   "2 free": "2 gratis",
   "per month": "al mes",
   "& pickup": "y recogida",
@@ -345,11 +399,13 @@ const es: Dict = {
   "You agreed. Waiting for": "Aceptaste. Esperando a",
   "to pay the €1.00 fee.": "para que pague la tarifa de €1.00.",
   "Could not agree to that request.": "No se pudo aceptar esa solicitud.",
-  "You agreed. Your neighbor pays €1.00 to complete it.": "Aceptaste. Tu vecino paga €1.00 para completarlo.",
-  "You both agreed — the item is reserved for your neighbor.": "Ambos aceptaron — el artículo está reservado para tu vecino.",
+  "You agreed. Your neighbor pays €1.00 to complete it.":
+    "Aceptaste. Tu vecino paga €1.00 para completarlo.",
+  "You both agreed — the item is reserved for your neighbor.":
+    "Ambos aceptaron — el artículo está reservado para tu vecino.",
   "Loading your items…": "Cargando tus artículos…",
   Live: "Activo",
-  "Remove": "Eliminar",
+  Remove: "Eliminar",
   "Could not remove that listing.": "No se pudo eliminar ese artículo.",
   "Listing removed.": "Artículo eliminado.",
   "You haven't shared anything yet.": "Todavía no has compartido nada.",
@@ -360,16 +416,19 @@ const es: Dict = {
   "You've used your": "Has usado tus",
   "free claims this month": "reclamaciones gratis este mes",
   "Receiving is free for": "Recibir es gratis para",
-  "items every month. Each extra item you claim costs €": "artículos cada mes. Cada artículo extra que reclames cuesta €",
-  "— sharing your own items is always free.": "— compartir tus propios artículos siempre es gratis.",
+  "items every month. Each extra item you claim costs €":
+    "artículos cada mes. Cada artículo extra que reclames cuesta €",
+  "— sharing your own items is always free.":
+    "— compartir tus propios artículos siempre es gratis.",
   "Total due": "Total a pagar",
   "This claim is already confirmed.": "Esta reclamación ya está confirmada.",
-  "Pay": "Pagar",
+  Pay: "Pagar",
   "Payment is handled securely by our payment provider. Your card details never touch Hey Neighbor.":
     "El pago se procesa de forma segura por nuestro proveedor de pagos. Tus datos de tarjeta nunca llegan a Hey Neighbor.",
   "Payment is processing — we'll confirm your claim as soon as it settles.":
     "El pago se está procesando — confirmaremos tu reclamación en cuanto se complete.",
-  "Payment complete — your claim is confirmed.": "Pago completado — tu reclamación está confirmada.",
+  "Payment complete — your claim is confirmed.":
+    "Pago completado — tu reclamación está confirmada.",
   "Payment could not be confirmed.": "No se pudo confirmar el pago.",
   "Checkout could not be started.": "No se pudo iniciar el pago.",
 };

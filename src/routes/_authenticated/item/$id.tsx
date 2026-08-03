@@ -10,6 +10,7 @@ import {
   Lock,
   MessageCircle,
   PackageCheck,
+  Share2,
   ShieldAlert,
   UserX,
 } from "lucide-react";
@@ -198,6 +199,35 @@ function ItemScreen() {
     }
   }
 
+  async function handleShare() {
+    if (typeof window === "undefined") return;
+    const url = `${window.location.origin}/item/${listing.id}`;
+    const nav: Navigator = window.navigator;
+    async function copyLink() {
+      await nav.clipboard.writeText(url);
+      toast.success(t("Link copied — share it with anyone."));
+    }
+    try {
+      if (typeof nav.share === "function") {
+        await nav.share({
+          title: listing.title,
+          text: t("Check out this item shared on Hey Neighbor:") + ` ${listing.title}`,
+          url,
+        });
+        return;
+      }
+      await copyLink();
+    } catch (error) {
+      if ((error as Error)?.name === "AbortError") return;
+      try {
+        await copyLink();
+      } catch {
+        toast.error(t("Could not share this item."));
+      }
+    }
+  }
+
+
   async function handleReport() {
     if (!userId) return;
     try {
@@ -223,7 +253,7 @@ function ItemScreen() {
 
   return (
     <PhoneShell>
-      <div className="grid grid-cols-[2.5rem_1fr_4.5rem] items-center px-4 pt-2 pb-4">
+      <div className="grid grid-cols-[2.5rem_1fr_6rem] items-center px-4 pt-2 pb-4">
         <Link to="/home" aria-label={t("Go back")} className="flex size-10 items-center justify-center -ml-2">
           <ChevronLeft className="size-6" strokeWidth={2.4} />
         </Link>
@@ -235,6 +265,9 @@ function ItemScreen() {
           </div>
         </div>
         <div className="flex items-center justify-end gap-3">
+          <button aria-label={t("Share this item")} onClick={handleShare}>
+            <Share2 className="size-5 text-primary" />
+          </button>
           <button aria-label={t("Report listing")} onClick={handleReport}>
             <Flag className="size-5 text-muted-foreground" />
           </button>
@@ -296,7 +329,18 @@ function ItemScreen() {
             {listing.description || t("No description added.")}
           </p>
         </div>
+
+        <Button
+          type="button"
+          size="lg"
+          variant="outline"
+          onClick={handleShare}
+          className="mt-5 h-12 w-full rounded-xl border-primary/40 text-[15px] font-bold text-primary"
+        >
+          <Share2 className="mr-2 size-4" /> {t("Share this item")}
+        </Button>
       </div>
+
 
       {isMine ? (
         <p className="mt-6 px-5 text-center text-sm text-muted-foreground">{t("This is your own listing.")}</p>

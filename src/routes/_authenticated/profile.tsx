@@ -1,7 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Settings, User, Mail, Phone, MapPin, Camera, LogOut, Loader2, ShieldCheck, Languages, UserX } from "lucide-react";
+import {
+  Settings,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Camera,
+  LogOut,
+  Loader2,
+  ShieldCheck,
+  Languages,
+  UserX,
+} from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { StatusBar } from "@/components/PhoneShell";
@@ -9,10 +21,9 @@ import { BottomNav } from "@/components/BottomNav";
 import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/ListingPhoto";
 import { Button } from "@/components/ui/button";
-import { GitHubSyncButton } from "@/components/GitHubSyncButton";
 import { useUserId } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadPhoto } from "@/lib/photos";
+import { uploadPhoto, ExplicitImageError } from "@/lib/photos";
 import {
   fetchBlockedUsers,
   fetchFreeClaimsUsed,
@@ -25,7 +36,6 @@ import {
 
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useT } from "@/lib/i18n";
-
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -110,8 +120,6 @@ function ProfileScreen() {
     }
   }
 
-
-
   useEffect(() => {
     const p = data.data?.profile;
     const pv = data.data?.priv;
@@ -190,13 +198,18 @@ function ProfileScreen() {
     setBusy(true);
     try {
       const path = await uploadPhoto(userId, file, "avatars");
-      const { error } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", userId);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path })
+        .eq("id", userId);
       if (error) throw error;
       toast.success(t("Photo updated."));
       queryClient.invalidateQueries({ queryKey: ["my-profile", userId] });
-    } catch {
-      toast.error(t("Could not upload that photo."));
+    } catch (error) {
+      if (error instanceof ExplicitImageError) toast.error(t(error.message));
+      else toast.error(t("Could not upload that photo."));
     } finally {
+
       setBusy(false);
     }
   }
@@ -224,7 +237,9 @@ function ProfileScreen() {
         </div>
         <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center px-4 pb-1 pt-1">
           <span />
-          <h1 className="text-center text-lg font-bold text-primary-foreground">{t("My Profile")}</h1>
+          <h1 className="text-center text-lg font-bold text-primary-foreground">
+            {t("My Profile")}
+          </h1>
           <button
             aria-label={t("Edit profile")}
             onClick={() => setEditing((v) => !v)}
@@ -233,7 +248,6 @@ function ProfileScreen() {
             <Settings className="size-6" />
           </button>
         </div>
-
 
         <div className="flex justify-center pb-14 pt-4">
           <div className="relative">
@@ -325,17 +339,23 @@ function ProfileScreen() {
 
               <div className="rounded-2xl bg-primary-soft p-4 mt-4">
                 <p className="text-[13px] font-semibold text-primary-deep">
-                  {claims.data ?? 0} {t("of")} {FREE_CLAIM_LIMIT} {t("free claims used this month. Free claims reset on the 1st; extra claims cost €1.00 each.")}
+                  {claims.data ?? 0} {t("of")} {FREE_CLAIM_LIMIT}{" "}
+                  {t(
+                    "free claims used this month. Free claims reset on the 1st; extra claims cost €1.00 each.",
+                  )}
                 </p>
                 <p className="mt-1 text-[12px] text-primary-deep/80">
                   {t("Matching radius")}: {form.radius_km} km ·{" "}
-                  {data.data?.priv?.lat != null ? t("Home location saved") : t("No home location yet")}
+                  {data.data?.priv?.lat != null
+                    ? t("Home location saved")
+                    : t("No home location yet")}
                 </p>
               </div>
 
               <div className="mt-4 rounded-2xl bg-card p-4">
                 <p className="flex items-center gap-2 text-[13px] font-bold">
-                  <UserX className="size-4 text-primary" strokeWidth={2.4} /> {t("Blocked neighbors")}
+                  <UserX className="size-4 text-primary" strokeWidth={2.4} />{" "}
+                  {t("Blocked neighbors")}
                 </p>
                 {blocked.isPending ? (
                   <p className="mt-2 text-[12px] text-muted-foreground">{t("Loading…")}</p>
@@ -369,8 +389,6 @@ function ProfileScreen() {
                 )}
               </div>
 
-
-
               <div className="mt-4 space-y-3">
                 <Button
                   variant="outline"
@@ -379,9 +397,22 @@ function ProfileScreen() {
                 >
                   <MapPin className="mr-2 size-4" /> {t("Use my current location")}
                 </Button>
-                <GitHubSyncButton />
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-12 w-full rounded-xl border-border text-[14px] font-bold"
+                >
+                  <Link to="/settings">
+                    <Settings className="mr-2 size-4" /> {t("Settings & recovery")}
+                  </Link>
+                </Button>
+
                 {isAdmin.data && (
-                  <Button asChild variant="outline" className="h-12 w-full rounded-xl border-border text-[14px] font-bold">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-12 w-full rounded-xl border-border text-[14px] font-bold"
+                  >
                     <Link to="/admin">
                       <ShieldCheck className="mr-2 size-4" /> {t("Admin dashboard")}
                     </Link>

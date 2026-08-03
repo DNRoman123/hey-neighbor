@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { PhoneShell } from "@/components/PhoneShell";
 import { BottomNav } from "@/components/BottomNav";
 import { TopBar } from "@/components/TopBar";
-import { Avatar } from "@/components/ListingPhoto";
+import { ListingPhoto } from "@/components/ListingPhoto";
 import { useUserId } from "@/hooks/useAuth";
 import { fetchConversations, neighborName } from "@/lib/db";
 import { useT } from "@/lib/i18n";
@@ -58,9 +58,9 @@ function ChatList() {
             return (
               <li key={c.id}>
                 <Link to="/chat/$id" params={{ id: c.id }} className="flex items-center gap-3 py-4">
-                  <Avatar
-                    path={c.person?.avatar_url}
-                    alt={name}
+                  <ListingPhoto
+                    path={c.listing?.photo_url}
+                    alt={c.listing?.title ?? name}
                     className="size-12 shrink-0 rounded-full object-cover"
                   />
                   <div className="min-w-0 flex-1">

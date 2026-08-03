@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Avatar, ListingPhoto } from "@/components/ListingPhoto";
+import { Avatar as ProfileAvatar, ListingPhoto } from "@/components/ListingPhoto";
 import { useUserId } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadPhoto, ExplicitImageError } from "@/lib/photos";
@@ -248,15 +248,13 @@ function ChatThread() {
 
         {(messages.data ?? []).map((m) => {
           const mine = m.sender_id === userId;
+          const sender =
+            m.sender_id === conversation.data?.owner_id
+              ? conversation.data?.owner
+              : conversation.data?.receiver;
           return (
             <div key={m.id} className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
-              {!mine && (
-                <Avatar
-                  path={conversation.data?.person?.avatar_url}
-                  alt={name}
-                  className="size-8 shrink-0 rounded-full object-cover"
-                />
-              )}
+              {!mine && <MessageAvatar path={sender?.avatar_url} name={neighborName(sender?.first_name, sender?.last_name)} />}
               <div
                 className={`max-w-[74%] rounded-2xl px-3.5 py-2.5 ${
                   mine
@@ -280,6 +278,7 @@ function ChatThread() {
                   {mine && <CheckCheck className="size-3 text-primary" />}
                 </p>
               </div>
+              {mine && <MessageAvatar path={sender?.avatar_url} name={neighborName(sender?.first_name, sender?.last_name)} />}
             </div>
           );
         })}
@@ -366,5 +365,15 @@ function ChatThread() {
       )}
 
     </PhoneShell>
+  );
+}
+
+function MessageAvatar({ path, name }: { path?: string | null; name: string }) {
+  return (
+    <ProfileAvatar
+      path={path}
+      alt={`${name} profile`}
+      className="size-8 shrink-0 rounded-full object-cover"
+    />
   );
 }

@@ -3,6 +3,13 @@ workflows:
     name: Hey Neighbor iOS - App Store
     instance_type: mac_mini_m2
     max_build_duration: 60
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
     integrations:
       app_store_connect: HeyNeighborASC
     environment:
@@ -26,36 +33,6 @@ workflows:
         script: npm run build
       - name: Sync Capacitor iOS project
         script: npx cap sync ios
-      - name: Configure native Google Sign-In
-        # Google client ids are public identifiers. A native release must have
-        # the iOS id baked into Info.plist, so fail before archiving if the live
-        # configuration is unavailable or malformed.
-        script: |
-          set -e
-          CLIENT_ID="${GOOGLE_IOS_CLIENT_ID:-}"
-          if [ -z "$CLIENT_ID" ]; then
-            CLIENT_ID="$(curl --fail --silent --show-error --retry 3 \
-              https://hey-neighbor-io.lovable.app/api/public/google-config \
-              | sed -n 's/.*"iosClientId":"\([^"]*\)".*/\1/p')"
-          fi
-          case "$CLIENT_ID" in
-            *.apps.googleusercontent.com)
-              PLIST="ios/App/App/Info.plist"
-              REVERSED="com.googleusercontent.apps.$(echo "$CLIENT_ID" | awk -F'.apps.googleusercontent.com' '{print $1}')"
-              /usr/libexec/PlistBuddy -c "Delete :GIDClientID" "$PLIST" 2>/dev/null || true
-              /usr/libexec/PlistBuddy -c "Add :GIDClientID string $CLIENT_ID" "$PLIST"
-              /usr/libexec/PlistBuddy -c "Delete :CFBundleURLTypes" "$PLIST" 2>/dev/null || true
-              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" "$PLIST"
-              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0 dict" "$PLIST"
-              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" "$PLIST"
-              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $REVERSED" "$PLIST"
-              echo "Configured native Google Sign-In URL scheme."
-              ;;
-            *)
-              echo "A valid iOS Google client id could not be resolved."
-              exit 1
-              ;;
-          esac
       - name: Install CocoaPods (if the project uses them)
         script: |
           if [ -f ios/App/Podfile ]; then

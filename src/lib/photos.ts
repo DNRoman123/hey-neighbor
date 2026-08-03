@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { moderateImage } from "@/utils/moderation.functions";
-import { IMAGE_BLOCKED_MESSAGE } from "@/lib/moderation";
+import {
+  IMAGE_BLOCKED_MESSAGE,
+  IMAGE_UNCHECKED_MESSAGE,
+  IMAGE_UNSUPPORTED_MESSAGE,
+} from "@/lib/moderation";
 
 const cache = new Map<string, string>();
 
@@ -34,17 +38,26 @@ async function toSmallDataUrl(file: File) {
 }
 
 export class ExplicitImageError extends Error {
-  constructor() {
-    super(IMAGE_BLOCKED_MESSAGE);
+  constructor(message: string = IMAGE_BLOCKED_MESSAGE) {
+    super(message);
     this.name = "ExplicitImageError";
   }
 }
 
 export async function uploadPhoto(userId: string, file: File, folder: string) {
+  if (!file.type.startsWith("image/")) {
+    throw new ExplicitImageError(IMAGE_UNSUPPORTED_MESSAGE);
+  }
+
+  // Every photo must pass the safety review before it is stored.
   const dataUrl = await toSmallDataUrl(file);
-  if (dataUrl) {
-    const verdict = await moderateImage({ data: { dataUrl } });
-    if (!verdict.allowed) throw new ExplicitImageError();
+  if (!dataUrl) throw new ExplicitImageError(IMAGE_UNCHECKED_MESSAGE);
+
+  const verdict = await moderateImage({ data: { dataUrl } });
+  if (!verdict.allowed) {
+    throw new ExplicitImageError(
+      verdict.reason === "unverified" ? IMAGE_UNCHECKED_MESSAGE : IMAGE_BLOCKED_MESSAGE,
+    );
   }
 
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";

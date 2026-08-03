@@ -16,9 +16,10 @@ export const moderateImage = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<Verdict> => {
     const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) return { allowed: true };
+    // Fail closed: if we cannot review the photo, we do not accept it.
+    if (!apiKey) return { allowed: false, reason: "unverified" };
 
-    try {
+    const review = async (): Promise<Verdict> => {
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -49,7 +50,7 @@ export const moderateImage = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         console.error("image moderation failed", response.status);
-        return { allowed: true };
+        return { allowed: false, reason: "unverified" };
       }
 
       const json = (await response.json()) as {
@@ -57,9 +58,18 @@ export const moderateImage = createServerFn({ method: "POST" })
       };
       const verdict = (json.choices?.[0]?.message?.content ?? "").toUpperCase();
       if (verdict.includes("UNSAFE")) return { allowed: false, reason: "explicit" };
-      return { allowed: true };
-    } catch (error) {
-      console.error("image moderation error", error);
-      return { allowed: true };
+      if (verdict.includes("SAFE")) return { allowed: true };
+      return { allowed: false, reason: "unverified" };
+    };
+
+    // One retry, then block. An unreviewed photo is never stored.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const verdict = await review();
+        if (verdict.reason !== "unverified") return verdict;
+      } catch (error) {
+        console.error("image moderation error", error);
+      }
     }
+    return { allowed: false, reason: "unverified" };
   });

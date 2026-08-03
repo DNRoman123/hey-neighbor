@@ -268,6 +268,9 @@ export type Database = {
           lng: number | null
           phone: string | null
           radius_km: number
+          recovery_email: string | null
+          recovery_method: string
+          recovery_phone: string | null
           updated_at: string
         }
         Insert: {
@@ -281,6 +284,9 @@ export type Database = {
           lng?: number | null
           phone?: string | null
           radius_km?: number
+          recovery_email?: string | null
+          recovery_method?: string
+          recovery_phone?: string | null
           updated_at?: string
         }
         Update: {
@@ -294,6 +300,9 @@ export type Database = {
           lng?: number | null
           phone?: string | null
           radius_km?: number
+          recovery_email?: string | null
+          recovery_method?: string
+          recovery_phone?: string | null
           updated_at?: string
         }
         Relationships: []

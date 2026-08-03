@@ -33,15 +33,13 @@ function SupportScreen() {
           <p className="mt-1">
             Email:{" "}
             <a
-              href="mailto:support@hey-neighbor-io.lovable.app"
+              href="mailto:davidnroman@hotmail.com"
               className="text-primary underline underline-offset-2"
             >
-              support@hey-neighbor-io.lovable.app
+              davidnroman@hotmail.com
             </a>
           </p>
-          <p className="mt-1">
-            We aim to reply within 1–2 business days.
-          </p>
+          <p className="mt-1">We aim to reply within 1–2 business days.</p>
         </section>
         <section>
           <h2 className="text-sm font-bold text-foreground">Common topics</h2>

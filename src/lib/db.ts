@@ -315,12 +315,11 @@ export async function fetchConversation(conversationId: string, userId: string) 
   if (error) throw error;
   if (!data) return null;
   const otherId = data.owner_id === userId ? data.receiver_id : data.owner_id;
-  const [{ data: person }, { data: listing }] = await Promise.all([
+  const [{ data: people }, { data: listing }] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, first_name, last_name, avatar_url")
-      .eq("id", otherId)
-      .maybeSingle(),
+      .in("id", [data.owner_id, data.receiver_id]),
     data.listing_id
       ? supabase
           .from("listings")
@@ -329,7 +328,14 @@ export async function fetchConversation(conversationId: string, userId: string) 
           .maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
-  return { ...data, person, listing };
+  const participants = people ?? [];
+  return {
+    ...data,
+    person: participants.find((profile) => profile.id === otherId) ?? null,
+    owner: participants.find((profile) => profile.id === data.owner_id) ?? null,
+    receiver: participants.find((profile) => profile.id === data.receiver_id) ?? null,
+    listing,
+  };
 }
 
 export type ChatLock = { locked: boolean; claimId: string | null };

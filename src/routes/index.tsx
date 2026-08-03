@@ -7,8 +7,6 @@ import { PhoneShell } from "@/components/PhoneShell";
 import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
-import { isNativeGoogleConfigured } from "@/lib/googleNative";
 import itemMix from "@/assets/item-mix.jpg";
 
 export const Route = createFileRoute("/")({
@@ -97,50 +95,12 @@ function AuthScreen() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
-  // Google refuses OAuth requests that start inside an embedded app webview
-  // (it answers invalid_request), so the native iOS shell uses email sign-in.
-  // Fail closed until platform detection completes so the native webview can
-  // never briefly expose Google's unsupported embedded OAuth flow.
-  const [isNativeApp, setIsNativeApp] = useState(true);
-  const [googleReady, setGoogleReady] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    isNativeGoogleConfigured()
-      .then((ok) => {
-        if (!cancelled) setGoogleReady(ok);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/home", replace: true });
     });
   }, [navigate]);
-
-  useEffect(() => {
-    let cancelled = false;
-    // Belt-and-braces: the native shell loads the deployed site, so also look at
-    // the injected Capacitor bridge / webview user agent, not just the module.
-    const bridge = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } })
-      .Capacitor;
-    const uaNative = /capacitor|heyneigh/i.test(navigator.userAgent);
-    if (bridge?.isNativePlatform?.() || uaNative) return;
-    import("@capacitor/core")
-      .then(({ Capacitor }) => {
-        if (!cancelled) setIsNativeApp(Capacitor.isNativePlatform());
-      })
-      .catch(() => {
-        if (!cancelled) setIsNativeApp(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -194,46 +154,6 @@ function AuthScreen() {
     } finally {
       setBusy(false);
     }
-  }
-
-  async function handleGoogle() {
-    setBusy(true);
-    // Native iOS: Google blocks OAuth inside embedded webviews, so use the
-    // native Google SDK and exchange its id_token for a session.
-    if (isNativeApp) {
-      try {
-        const { signInWithNativeGoogle } = await import("@/lib/googleNative");
-        await signInWithNativeGoogle();
-        navigate({ to: "/home", replace: true });
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "";
-        // Older app builds do not contain the native Google Sign-In plugin, so
-        // the bridge reports "not implemented". Point people at email sign-in
-        // instead of showing a raw plugin error.
-        if (/not implemented|unimplemented|UNIMPLEMENTED/i.test(message)) {
-          toast.error(
-            t(
-              "Google sign-in needs the latest app update. Please update Hey Neighbor, or sign in with your email and password.",
-            ),
-          );
-        } else {
-          toast.error(message || t("Google sign-in failed. Please try again."));
-        }
-      } finally {
-        setBusy(false);
-      }
-      return;
-    }
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      setBusy(false);
-      toast.error(t("Google sign-in failed. Please try again."));
-      return;
-    }
-    if (result.redirected) return;
-    navigate({ to: "/home", replace: true });
   }
 
   return (
@@ -334,29 +254,6 @@ function AuthScreen() {
             </div>
           )}
         </form>
-
-        {(!isNativeApp || googleReady) && (
-          <>
-            <div className="my-5 flex items-center gap-3">
-              <span className="h-px flex-1 bg-border" />
-              <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                {t("or")}
-              </span>
-              <span className="h-px flex-1 bg-border" />
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              disabled={busy}
-              onClick={handleGoogle}
-              className="h-13 w-full rounded-xl border-border text-[15px] font-bold"
-            >
-              {t("Continue with Google")}
-            </Button>
-          </>
-        )}
 
         <p className="mt-5 px-2 text-center text-[13px] leading-relaxed text-muted-foreground">
           {t("By creating an account, you agree to our")}{" "}

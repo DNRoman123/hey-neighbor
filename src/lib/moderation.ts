@@ -61,6 +61,12 @@ export const LANGUAGE_BLOCKED_MESSAGE =
 export const IMAGE_BLOCKED_MESSAGE =
   "That photo looks unsafe. Nudity, sexual or explicit images are not allowed.";
 
+export const IMAGE_UNCHECKED_MESSAGE =
+  "We couldn't safety-check that photo, so it wasn't uploaded. Please try again.";
+
+export const IMAGE_UNSUPPORTED_MESSAGE =
+  "Please choose a photo file (JPG or PNG).";
+
 /** Maps a database guard error into a friendly message. */
 export function moderationErrorMessage(error: unknown) {
   const message = String((error as { message?: string })?.message ?? error ?? "");
