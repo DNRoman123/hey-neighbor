@@ -54,7 +54,7 @@ export function AppDescription({ tone = "dark" }: { tone?: "dark" | "light" }) {
               }`}
             >
               {t(
-                "To keep Hey Neighbor safe, ad-free and encourage reducing waste, a 1 euro fee applies after your first 2 successful pickups.",
+                "To help keep Hey Neighbor safe, ad-free, and sustainable, the first 2 successful item pickups each month are free. After that, a €1 fee applies to each additional item you receive.",
               )}
             </p>
             <p

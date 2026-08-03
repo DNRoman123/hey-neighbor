@@ -399,8 +399,8 @@ const es: Dict = {
   "Sharing is always free.": "Compartir siempre es gratis.",
   "Neighbors share everyday things they no longer need — from baby gear to garden tools — so nothing goes to waste.":
     "Los vecinos comparten cosas cotidianas que ya no necesitan — desde artículos de bebé hasta herramientas de jardín — para que nada se desperdicie.",
-  "To keep Hey Neighbor safe, ad-free and encourage reducing waste, a 1 euro fee applies after your first 2 successful pickups.":
-    "Para mantener Hey Neighbor seguro, sin anuncios y fomentar la reducción de residuos, se aplica una tarifa de 1 euro después de tus 2 primeras recogidas exitosas.",
+  "To help keep Hey Neighbor safe, ad-free, and sustainable, the first 2 successful item pickups each month are free. After that, a €1 fee applies to each additional item you receive.":
+    "Para ayudar a mantener Hey Neighbor seguro, sin anuncios y sostenible, las 2 primeras recogidas exitosas de cada mes son gratis. Después, se aplica una tarifa de 1 € por cada artículo adicional que recibas.",
   "We are helping people:": "Estamos ayudando a las personas:",
   "Reduce Waste": "Reduce residuos",
   "Save Money": "Ahorra dinero",
