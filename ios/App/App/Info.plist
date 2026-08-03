@@ -18,6 +18,15 @@
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.196797794318-3sb7ek568kbt4n2ehc2cddtapkl0lbsn</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
@@ -26,6 +35,8 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>GIDClientID</key>
+	<string>196797794318-3sb7ek568kbt4n2ehc2cddtapkl0lbsn.apps.googleusercontent.com</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Hey Neighbor uses your location to show items neighbors are sharing within 1 km of you.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
