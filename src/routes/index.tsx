@@ -8,8 +8,8 @@ import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { isNativeGoogleConfigured } from "@/lib/googleNative";
 import itemMix from "@/assets/item-mix.jpg";
-
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,7 +31,6 @@ export const Route = createFileRoute("/")({
   }),
   component: AuthScreen,
 });
-
 
 const signupSchema = z.object({
   username: z.string().trim().min(2, "Username is too short").max(40),
@@ -103,6 +102,19 @@ function AuthScreen() {
   // Fail closed until platform detection completes so the native webview can
   // never briefly expose Google's unsupported embedded OAuth flow.
   const [isNativeApp, setIsNativeApp] = useState(true);
+  const [googleReady, setGoogleReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    isNativeGoogleConfigured()
+      .then((ok) => {
+        if (!cancelled) setGoogleReady(ok);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -112,16 +124,23 @@ function AuthScreen() {
 
   useEffect(() => {
     let cancelled = false;
+    // Belt-and-braces: the native shell loads the deployed site, so also look at
+    // the injected Capacitor bridge / webview user agent, not just the module.
+    const bridge = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } })
+      .Capacitor;
+    const uaNative = /capacitor|heyneigh/i.test(navigator.userAgent);
+    if (bridge?.isNativePlatform?.() || uaNative) return;
     import("@capacitor/core")
       .then(({ Capacitor }) => {
         if (!cancelled) setIsNativeApp(Capacitor.isNativePlatform());
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setIsNativeApp(false);
+      });
     return () => {
       cancelled = true;
     };
   }, []);
-
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -149,7 +168,8 @@ function AuthScreen() {
           toast.error(error.message);
           return;
         }
-        // Auto-confirm is enabled, so signup returns a live session.
+        // A session is present only for an already confirmed identity. New
+        // email/password accounts must confirm through the branded email first.
         if (data.session) {
           navigate({ to: "/home", replace: true });
           return;
@@ -177,8 +197,33 @@ function AuthScreen() {
   }
 
   async function handleGoogle() {
-    if (isNativeApp) return;
     setBusy(true);
+    // Native iOS: Google blocks OAuth inside embedded webviews, so use the
+    // native Google SDK and exchange its id_token for a session.
+    if (isNativeApp) {
+      try {
+        const { signInWithNativeGoogle } = await import("@/lib/googleNative");
+        await signInWithNativeGoogle();
+        navigate({ to: "/home", replace: true });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "";
+        // Older app builds do not contain the native Google Sign-In plugin, so
+        // the bridge reports "not implemented". Point people at email sign-in
+        // instead of showing a raw plugin error.
+        if (/not implemented|unimplemented|UNIMPLEMENTED/i.test(message)) {
+          toast.error(
+            t(
+              "Google sign-in needs the latest app update. Please update Hey Neighbor, or sign in with your email and password.",
+            ),
+          );
+        } else {
+          toast.error(message || t("Google sign-in failed. Please try again."));
+        }
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
@@ -204,7 +249,10 @@ function AuthScreen() {
         <div className="mt-5 flex items-stretch gap-3 overflow-hidden rounded-2xl bg-primary-soft p-4">
           <p className="flex-1 self-center text-[13px] font-semibold leading-snug text-primary-deep">
             {t("All items deserve a second home.")}
-            <Heart className="ml-1 inline size-3.5 -translate-y-px fill-primary text-primary" strokeWidth={0} />
+            <Heart
+              className="ml-1 inline size-3.5 -translate-y-px fill-primary text-primary"
+              strokeWidth={0}
+            />
           </p>
           <img
             src={itemMix}
@@ -221,7 +269,9 @@ function AuthScreen() {
               key={tabKey}
               onClick={() => setTab(tabKey)}
               className={`border-b-2 pb-2.5 text-sm font-bold transition-colors ${
-                tab === tabKey ? "border-primary text-primary" : "border-border text-muted-foreground"
+                tab === tabKey
+                  ? "border-primary text-primary"
+                  : "border-border text-muted-foreground"
               }`}
             >
               {tabKey === "login" ? t("Log In") : t("Sign Up")}
@@ -231,7 +281,12 @@ function AuthScreen() {
 
         <form className="mt-5 space-y-3" onSubmit={handleSubmit}>
           {tab === "signup" && (
-            <Field icon={User} placeholder={t("Username")} value={username} onChange={setUsername} />
+            <Field
+              icon={User}
+              placeholder={t("Username")}
+              value={username}
+              onChange={setUsername}
+            />
           )}
           <Field
             icon={Mail}
@@ -250,7 +305,13 @@ function AuthScreen() {
             autoComplete={tab === "signup" ? "new-password" : "current-password"}
           />
           {tab === "signup" && (
-            <Field icon={Lock} placeholder={t("Confirm Password")} secret value={confirm} onChange={setConfirm} />
+            <Field
+              icon={Lock}
+              placeholder={t("Confirm Password")}
+              secret
+              value={confirm}
+              onChange={setConfirm}
+            />
           )}
 
           <Button
@@ -262,13 +323,25 @@ function AuthScreen() {
             {busy && <Loader2 className="mr-2 size-4 animate-spin" />}
             {tab === "signup" ? t("Create Account") : t("Log In")}
           </Button>
+          {tab === "login" && (
+            <div className="text-center">
+              <Link
+                to="/forgot-password"
+                className="text-[13px] font-bold text-primary hover:underline"
+              >
+                {t("Forgot your password?")}
+              </Link>
+            </div>
+          )}
         </form>
 
-        {!isNativeApp && (
+        {(!isNativeApp || googleReady) && (
           <>
             <div className="my-5 flex items-center gap-3">
               <span className="h-px flex-1 bg-border" />
-              <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("or")}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                {t("or")}
+              </span>
               <span className="h-px flex-1 bg-border" />
             </div>
 
@@ -285,7 +358,6 @@ function AuthScreen() {
           </>
         )}
 
-
         <p className="mt-5 px-2 text-center text-[13px] leading-relaxed text-muted-foreground">
           {t("By creating an account, you agree to our")}{" "}
           <Link to="/terms" className="font-semibold text-foreground underline">
@@ -297,7 +369,6 @@ function AuthScreen() {
           </Link>
           .
         </p>
-
       </div>
     </PhoneShell>
   );
