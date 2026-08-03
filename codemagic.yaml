@@ -7,9 +7,10 @@ workflows:
       app_store_connect: HeyNeighborASC
     environment:
       ios_signing:
-        # Install the uploaded distribution certificate. The matching profile
-        # is fetched from Apple during the build instead of relying on a stale
-        # or missing Codemagic profile reference.
+        distribution_type: app_store
+        bundle_identifier: app.lovable.heyneigh
+        # Use the uploaded certificate while matching any valid App Store
+        # profile for this exact bundle identifier from Codemagic's library.
         certificates:
           - Hey Neighbor Distribution
       vars:
