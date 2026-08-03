@@ -1,16 +1,19 @@
 workflows:
   ios-appstore:
     name: Hey Neighbor iOS - App Store
-    # Cloud macOS machine with the latest Xcode. No local Mac needed.
     instance_type: mac_mini_m2
     max_build_duration: 60
     integrations:
       app_store_connect: HeyNeighborASC
     environment:
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: app.lovable.heyneigh
-      # The iOS Google client ID is read from the deployed public config endpoint.
+        # Uses the code signing identities already uploaded to Codemagic
+        # (Team settings > Code signing identities), so no profile has to be
+        # created during the build.
+        certificates:
+          - Hey Neighbor Distribution
+        provisioning_profiles:
+          - Hey Neighborbor ios_app_store 1785694858
       vars:
         BUNDLE_ID: "app.lovable.heyneigh"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
@@ -23,41 +26,38 @@ workflows:
 
     scripts:
       - name: Install dependencies
-        script: npm ci || npm install
+        script: npm install --no-audit --no-fund
       - name: Build web bundle
         script: npm run build
       - name: Sync Capacitor iOS project
         script: npx cap sync ios
       - name: Configure native Google Sign-In
-        # Uses GOOGLE_IOS_CLIENT_ID from the Codemagic env group when present,
-        # otherwise reads it from the deployed app (Google client ids are public
-        # identifiers), so no CI variable has to be maintained by hand.
+        # Google client ids are public identifiers, so the value is read from
+        # the deployed config endpoint when no CI variable is present. This step
+        # never fails the build: Google login simply stays disabled if unset.
         script: |
-          set -euo pipefail
           CLIENT_ID="${GOOGLE_IOS_CLIENT_ID:-}"
           if [ -z "$CLIENT_ID" ]; then
-            echo "GOOGLE_IOS_CLIENT_ID not set - fetching it from the deployed app"
             CLIENT_ID="$(curl -fsS https://hey-neighbor-io.lovable.app/api/public/google-config \
               | sed -n 's/.*"iosClientId":"\([^"]*\)".*/\1/p' || true)"
           fi
           case "$CLIENT_ID" in
-            *.apps.googleusercontent.com) ;;
+            *.apps.googleusercontent.com)
+              PLIST="ios/App/App/Info.plist"
+              REVERSED="com.googleusercontent.apps.$(echo "$CLIENT_ID" | awk -F'.apps.googleusercontent.com' '{print $1}')"
+              /usr/libexec/PlistBuddy -c "Delete :GIDClientID" "$PLIST" 2>/dev/null || true
+              /usr/libexec/PlistBuddy -c "Add :GIDClientID string $CLIENT_ID" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Delete :CFBundleURLTypes" "$PLIST" 2>/dev/null || true
+              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0 dict" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $REVERSED" "$PLIST"
+              echo "Configured native Google Sign-In URL scheme."
+              ;;
             *)
-              echo "Could not resolve a valid iOS Google client id. Add GOOGLE_IOS_CLIENT_ID to the 'appstore' environment-variable group in Codemagic (value ends in .apps.googleusercontent.com)."
-              exit 1
+              echo "No iOS Google client id resolved - skipping Google Sign-In configuration."
               ;;
           esac
-          PLIST="ios/App/App/Info.plist"
-          REVERSED="$(echo "$CLIENT_ID" | awk -F'.apps.googleusercontent.com' '{print $1}')"
-          REVERSED="com.googleusercontent.apps.$REVERSED"
-          /usr/libexec/PlistBuddy -c "Delete :GIDClientID" "$PLIST" 2>/dev/null || true
-          /usr/libexec/PlistBuddy -c "Add :GIDClientID string $CLIENT_ID" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Delete :CFBundleURLTypes" "$PLIST" 2>/dev/null || true
-          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0 dict" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $REVERSED" "$PLIST"
-          echo "Configured native Google Sign-In URL scheme."
       - name: Install CocoaPods (if the project uses them)
         script: |
           if [ -f ios/App/Podfile ]; then
@@ -66,12 +66,10 @@ workflows:
       - name: Set build number
         script: |
           cd ios/App
-          # A monotonically increasing UTC timestamp avoids an unnecessary API
-          # request before signing credentials have been validated.
           agvtool new-version -all "$(date -u +%y%m%d%H%M)"
       - name: Set up signing
         script: |
-          set -euo pipefail
+          set -e
           xcode-project use-profiles \
             --project "$XCODE_PROJECT" \
             --archive-method app-store \
@@ -79,6 +77,7 @@ workflows:
             --code-signing-setup-verbose-logging
       - name: Build .ipa
         script: |
+          set -e
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME" \
@@ -90,12 +89,8 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        # Apple allows only one build per train in beta review at a time, so
-        # auto-submission is off: the build still lands in TestFlight and can be
-        # submitted manually from App Store Connect when the previous one clears.
         submit_to_testflight: false
         submit_to_app_store: false
-
       email:
         recipients:
           - davidnroman@hotmail.com
