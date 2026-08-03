@@ -27,6 +27,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat/index'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat/$id'
 import { Route as AuthenticatedItemIdRouteImport } from './routes/_authenticated/item/$id'
+import { Route as AuthenticatedNeighborIdRouteImport } from './routes/_authenticated/neighbor/$id'
 import { Route as AuthenticatedPayClaimIdRouteImport } from './routes/_authenticated/pay/$claimId'
 import { Route as AuthenticatedShareIndexRouteImport } from './routes/_authenticated/share/index'
 import { Route as AuthenticatedShareIdRouteImport } from './routes/_authenticated/share/$id'
@@ -124,6 +125,11 @@ const AuthenticatedItemIdRoute = AuthenticatedItemIdRouteImport.update({
   path: '/item/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNeighborIdRoute = AuthenticatedNeighborIdRouteImport.update({
+  id: '/neighbor/$id',
+  path: '/neighbor/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPayClaimIdRoute = AuthenticatedPayClaimIdRouteImport.update({
   id: '/pay/$claimId',
   path: '/pay/$claimId',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/item/$id': typeof AuthenticatedItemIdRoute
+  '/neighbor/$id': typeof AuthenticatedNeighborIdRoute
   '/pay/$claimId': typeof AuthenticatedPayClaimIdRoute
   '/share/$id': typeof AuthenticatedShareIdRoute
   '/api/public/google-config': typeof ApiPublicGoogleConfigRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/item/$id': typeof AuthenticatedItemIdRoute
+  '/neighbor/$id': typeof AuthenticatedNeighborIdRoute
   '/pay/$claimId': typeof AuthenticatedPayClaimIdRoute
   '/share/$id': typeof AuthenticatedShareIdRoute
   '/api/public/google-config': typeof ApiPublicGoogleConfigRoute
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/item/$id': typeof AuthenticatedItemIdRoute
+  '/_authenticated/neighbor/$id': typeof AuthenticatedNeighborIdRoute
   '/_authenticated/pay/$claimId': typeof AuthenticatedPayClaimIdRoute
   '/_authenticated/share/$id': typeof AuthenticatedShareIdRoute
   '/api/public/google-config': typeof ApiPublicGoogleConfigRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$id'
     | '/item/$id'
+    | '/neighbor/$id'
     | '/pay/$claimId'
     | '/share/$id'
     | '/api/public/google-config'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$id'
     | '/item/$id'
+    | '/neighbor/$id'
     | '/pay/$claimId'
     | '/share/$id'
     | '/api/public/google-config'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/chat/$id'
     | '/_authenticated/item/$id'
+    | '/_authenticated/neighbor/$id'
     | '/_authenticated/pay/$claimId'
     | '/_authenticated/share/$id'
     | '/api/public/google-config'
@@ -467,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedItemIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/neighbor/$id': {
+      id: '/_authenticated/neighbor/$id'
+      path: '/neighbor/$id'
+      fullPath: '/neighbor/$id'
+      preLoaderRoute: typeof AuthenticatedNeighborIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pay/$claimId': {
       id: '/_authenticated/pay/$claimId'
       path: '/pay/$claimId'
@@ -528,6 +547,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
   AuthenticatedItemIdRoute: typeof AuthenticatedItemIdRoute
+  AuthenticatedNeighborIdRoute: typeof AuthenticatedNeighborIdRoute
   AuthenticatedPayClaimIdRoute: typeof AuthenticatedPayClaimIdRoute
   AuthenticatedShareIdRoute: typeof AuthenticatedShareIdRoute
   AuthenticatedChatIndexRoute: typeof AuthenticatedChatIndexRoute
@@ -543,6 +563,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
   AuthenticatedItemIdRoute: AuthenticatedItemIdRoute,
+  AuthenticatedNeighborIdRoute: AuthenticatedNeighborIdRoute,
   AuthenticatedPayClaimIdRoute: AuthenticatedPayClaimIdRoute,
   AuthenticatedShareIdRoute: AuthenticatedShareIdRoute,
   AuthenticatedChatIndexRoute: AuthenticatedChatIndexRoute,
@@ -570,13 +591,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

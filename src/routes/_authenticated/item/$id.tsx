@@ -10,6 +10,7 @@ import {
   Lock,
   MessageCircle,
   PackageCheck,
+  HandHeart,
   Share2,
   ShieldAlert,
   UserX,
@@ -40,6 +41,7 @@ import {
   fetchFreeClaimsUsed,
   fetchListing,
   fetchMyClaim,
+  markListingGiven,
   formatBestBefore,
   neighborName,
   openConversation,
@@ -110,7 +112,7 @@ function ItemScreen() {
   const userId = useUserId();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [busy, setBusy] = useState<"claim" | "chat" | null>(null);
+  const [busy, setBusy] = useState<"claim" | "chat" | "given" | null>(null);
   const [agreed, setAgreed] = useState(false);
 
   const item = useQuery({ queryKey: ["listing", id], queryFn: () => fetchListing(id) });
@@ -194,6 +196,22 @@ function ItemScreen() {
     } catch (error) {
       console.error(error);
       toast.error(t("Could not open the chat."));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleGiven() {
+    setBusy("given");
+    try {
+      await markListingGiven(listing.id);
+      queryClient.invalidateQueries({ queryKey: ["listing", listing.id] });
+      queryClient.invalidateQueries({ queryKey: ["my-listings", userId] });
+      queryClient.invalidateQueries({ queryKey: ["nearby"] });
+      toast.success(t("Marked as given to your neighbor."));
+    } catch (error) {
+      console.error(error);
+      toast.error(t("Could not mark that item as given."));
     } finally {
       setBusy(null);
     }
@@ -343,7 +361,28 @@ function ItemScreen() {
 
 
       {isMine ? (
-        <p className="mt-6 px-5 text-center text-sm text-muted-foreground">{t("This is your own listing.")}</p>
+        <div className="mt-6 space-y-3 px-5">
+          <p className="text-center text-sm text-muted-foreground">{t("This is your own listing.")}</p>
+          {listing.status === "collected" ? (
+            <p className="flex items-center justify-center gap-2 text-[13px] font-bold text-primary">
+              <Check className="size-4" strokeWidth={3} /> {t("Given to my neighbor")}
+            </p>
+          ) : (
+            <Button
+              size="lg"
+              disabled={busy !== null}
+              onClick={handleGiven}
+              className="h-13 w-full rounded-xl text-[15px] font-bold"
+            >
+              {busy === "given" ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <HandHeart className="mr-2 size-4" />
+              )}
+              {t("Given to my neighbor")}
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="mt-4 space-y-3 px-4">
           {chatLocked ? (

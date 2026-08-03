@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Loader2, Trash2, Pencil, PackageCheck, ShieldAlert, Check, Hourglass } from "lucide-react";
+import { Plus, Loader2, Trash2, Pencil, PackageCheck, ShieldAlert, Check, Hourglass, HandHeart } from "lucide-react";
 import { toast } from "sonner";
 import { PhoneShell } from "@/components/PhoneShell";
 import { BottomNav } from "@/components/BottomNav";
@@ -27,6 +27,7 @@ import {
   fetchFreeClaimsUsed,
   fetchIncomingRequests,
   fetchMyListings,
+  markListingGiven,
   formatBestBefore,
   neighborName,
   ownerAcceptClaim,
@@ -77,6 +78,23 @@ function ListingsScreen() {
   const [agreeing, setAgreeing] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [giving, setGiving] = useState<string | null>(null);
+
+  async function markGiven(id: string) {
+    setGiving(id);
+    try {
+      await markListingGiven(id);
+      toast.success(t("Marked as given to your neighbor."));
+      queryClient.invalidateQueries({ queryKey: ["my-listings", userId] });
+      queryClient.invalidateQueries({ queryKey: ["incoming-requests", userId] });
+      queryClient.invalidateQueries({ queryKey: ["nearby"] });
+    } catch (error) {
+      console.error(error);
+      toast.error(t("Could not mark that item as given."));
+    } finally {
+      setGiving(null);
+    }
+  }
 
 
   async function agree(claimId: string) {
@@ -226,7 +244,26 @@ function ListingsScreen() {
                   )}
                   {t("Delete")}
                 </button>
-
+                {item.status !== "collected" && (
+                  <button
+                    aria-label={`${t("Given to my neighbor")} — ${item.title}`}
+                    onClick={() => markGiven(item.id)}
+                    disabled={giving !== null}
+                    className="flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1.5 text-[11px] font-bold text-primary-foreground"
+                  >
+                    {giving === item.id ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <HandHeart className="size-4" />
+                    )}
+                    {t("Given to my neighbor")}
+                  </button>
+                )}
+                {item.status === "collected" && (
+                  <span className="flex items-center gap-1 text-[11px] font-bold text-primary">
+                    <Check className="size-4" strokeWidth={3} /> {t("Given")}
+                  </span>
+                )}
               </div>
             </li>
           ))}

@@ -7,7 +7,9 @@ import { PhoneShell } from "@/components/PhoneShell";
 import { ListingPhoto } from "@/components/ListingPhoto";
 import { useUserId } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchIsAdmin, formatExpiry, neighborName } from "@/lib/db";
+import { Avatar } from "@/components/ListingPhoto";
+import { fetchAdminReports, fetchIsAdmin, formatExpiry, neighborName } from "@/lib/db";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -45,13 +47,14 @@ function AdminScreen() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, username, is_suspended, created_at")
+        .select("id, first_name, last_name, username, avatar_url, is_suspended, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
     enabled: isAdmin.data === true,
   });
+
 
   const listings = useQuery({
     queryKey: ["admin-listings"],
@@ -69,16 +72,10 @@ function AdminScreen() {
 
   const reports = useQuery({
     queryKey: ["admin-reports"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("reports")
-        .select("id, reason, status, listing_id, message_id, created_at")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
+    queryFn: fetchAdminReports,
     enabled: isAdmin.data === true,
   });
+
 
   const payments = useQuery({
     queryKey: ["admin-payments"],
@@ -202,15 +199,27 @@ function AdminScreen() {
         {tab === "users" &&
           (users.data ?? []).map((u) => (
             <div key={u.id} className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-bold">
-                  {neighborName(u.first_name, u.last_name)}
-                  {u.username ? ` · @${u.username}` : ""}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Joined {new Date(u.created_at).toLocaleDateString()}
-                </p>
-              </div>
+              <Link
+                to="/neighbor/$id"
+                params={{ id: u.id }}
+                className="flex min-w-0 flex-1 items-center gap-3"
+              >
+                <Avatar
+                  path={u.avatar_url}
+                  alt={neighborName(u.first_name, u.last_name)}
+                  className="size-11 shrink-0 rounded-full object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-bold">
+                    {neighborName(u.first_name, u.last_name)}
+                    {u.username ? ` · @${u.username}` : ""}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Joined {new Date(u.created_at).toLocaleDateString()}
+                  </p>
+                  <p className="text-[11px] font-bold text-primary">View profile, items & chat</p>
+                </div>
+              </Link>
               <button
                 onClick={() => toggleSuspend(u.id, !u.is_suspended)}
                 className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold ${
@@ -221,6 +230,7 @@ function AdminScreen() {
               </button>
             </div>
           ))}
+
 
         {tab === "listings" &&
           (listings.data ?? []).map((l) => (
@@ -255,6 +265,45 @@ function AdminScreen() {
                 {r.listing_id ? "Listing report" : "Message report"} ·{" "}
                 {new Date(r.created_at).toLocaleDateString()} · {r.status}
               </p>
+              {r.listing ? (
+                <div className="mt-2 space-y-1 rounded-xl bg-secondary p-2.5 text-[12px]">
+                  <p className="truncate font-bold text-primary-deep">{r.listing.title}</p>
+                  <p className="text-muted-foreground">
+                    Given by{" "}
+                    {r.giver ? (
+                      <Link
+                        to="/neighbor/$id"
+                        params={{ id: r.giver.id }}
+                        className="font-bold text-primary"
+                      >
+                        {neighborName(r.giver.first_name, r.giver.last_name)}
+                      </Link>
+                    ) : (
+                      "unknown neighbor"
+                    )}
+                  </p>
+                  <p className="text-muted-foreground">
+                    Received by{" "}
+                    {r.receiver ? (
+                      <Link
+                        to="/neighbor/$id"
+                        params={{ id: r.receiver.id }}
+                        className="font-bold text-primary"
+                      >
+                        {neighborName(r.receiver.first_name, r.receiver.last_name)}
+                      </Link>
+                    ) : (
+                      "nobody yet"
+                    )}
+                    {r.handoverStatus ? ` · ${r.handoverStatus}` : ""}
+                  </p>
+                </div>
+              ) : null}
+              {r.reporter ? (
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  Reported by {neighborName(r.reporter.first_name, r.reporter.last_name)}
+                </p>
+              ) : null}
               {r.status === "open" && (
                 <button
                   onClick={() => resolveReport(r.id)}
@@ -265,6 +314,7 @@ function AdminScreen() {
               )}
             </div>
           ))}
+
 
         {tab === "payments" &&
           (payments.data ?? []).map((p) => (

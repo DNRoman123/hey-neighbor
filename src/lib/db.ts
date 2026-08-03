@@ -470,3 +470,119 @@ export async function fetchIsUserBlocked(userId: string, otherId: string) {
   };
 }
 
+
+/* --------------------------- Neighbor profiles ---------------------------- */
+
+/** A neighbor's public profile plus everything they're currently sharing. */
+export async function fetchNeighbor(id: string) {
+  const [{ data: profile, error }, { data: listings }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, first_name, last_name, username, avatar_url, area_label, is_suspended, created_at")
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("listings")
+      .select("id, title, category, condition, best_before, photo_url, status, created_at")
+      .eq("owner_id", id)
+      .eq("status", "active")
+      .order("created_at", { ascending: false }),
+  ]);
+  if (error) throw error;
+  return { profile: profile ?? null, listings: listings ?? [] };
+}
+
+/** Chat with a neighbor without a specific item attached. */
+export async function openDirectConversation(neighborId: string, userId: string) {
+  const existing = await supabase
+    .from("conversations")
+    .select("id")
+    .is("listing_id", null)
+    .or(
+      `and(owner_id.eq.${neighborId},receiver_id.eq.${userId}),and(owner_id.eq.${userId},receiver_id.eq.${neighborId})`,
+    )
+    .maybeSingle();
+  if (existing.data) return existing.data.id;
+  const { data, error } = await supabase
+    .from("conversations")
+    .insert({ listing_id: null, owner_id: neighborId, receiver_id: userId })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data.id;
+}
+
+/* ----------------------------- Handover ---------------------------------- */
+
+/** Giver confirms the item physically changed hands. */
+export async function markListingGiven(listingId: string) {
+  const { error } = await supabase
+    .from("listings")
+    .update({ status: "collected" })
+    .eq("id", listingId);
+  if (error) throw error;
+  await supabase
+    .from("claims")
+    .update({ status: "completed" })
+    .eq("listing_id", listingId)
+    .in("status", ["confirmed", "awaiting_owner", "pending_payment"]);
+}
+
+/* ------------------------------- Admin ----------------------------------- */
+
+/** Reports with the giver and receiver behind each reported item. */
+export async function fetchAdminReports() {
+  const { data, error } = await supabase
+    .from("reports")
+    .select("id, reason, status, listing_id, message_id, reporter_id, created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  const reports = data ?? [];
+  if (reports.length === 0) return [];
+
+  const listingIds = [...new Set(reports.map((r) => r.listing_id).filter(Boolean))] as string[];
+  const [listingsRes, claimsRes] = await Promise.all([
+    listingIds.length
+      ? supabase.from("listings").select("id, title, owner_id, status").in("id", listingIds)
+      : Promise.resolve({ data: [] as { id: string; title: string; owner_id: string; status: string }[] }),
+    listingIds.length
+      ? supabase
+          .from("claims")
+          .select("listing_id, receiver_id, status, owner_accepted_at")
+          .in("listing_id", listingIds)
+      : Promise.resolve({
+          data: [] as { listing_id: string; receiver_id: string; status: string; owner_accepted_at: string | null }[],
+        }),
+  ]);
+  const listings = listingsRes.data ?? [];
+  const claims = claimsRes.data ?? [];
+
+  const peopleIds = [
+    ...new Set([
+      ...reports.map((r) => r.reporter_id),
+      ...listings.map((l) => l.owner_id),
+      ...claims.map((c) => c.receiver_id),
+    ]),
+  ];
+  const { data: people } = peopleIds.length
+    ? await supabase.from("profiles").select("id, first_name, last_name, username, avatar_url").in("id", peopleIds)
+    : { data: [] as { id: string; first_name: string; last_name: string; username: string | null; avatar_url: string | null }[] };
+  const findPerson = (id?: string | null) => (people ?? []).find((p) => p.id === id) ?? null;
+
+  return reports.map((report) => {
+    const listing = listings.find((l) => l.id === report.listing_id) ?? null;
+    const claim = listing
+      ? claims
+          .filter((c) => c.listing_id === listing.id)
+          .sort((a, b) => (b.owner_accepted_at ?? "").localeCompare(a.owner_accepted_at ?? ""))[0] ?? null
+      : null;
+    return {
+      ...report,
+      listing,
+      giver: findPerson(listing?.owner_id),
+      receiver: findPerson(claim?.receiver_id),
+      handoverStatus: claim?.status ?? null,
+      reporter: findPerson(report.reporter_id),
+    };
+  });
+}
