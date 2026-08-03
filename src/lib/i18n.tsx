@@ -21,6 +21,8 @@ const es: Dict = {
   // Auth
   "Share anything anytime with your closest neighbors":
     "Comparte cualquier cosa en cualquier momento con tus vecinos más cercanos",
+  "Helping neighbors help neighbors. Find and share free food, clothing, and household essentials while reducing waste.":
+    "Vecinos ayudando a vecinos. Encuentra y comparte comida, ropa y artículos del hogar gratis mientras reduces el desperdicio.",
   "Share and find anything in your neighborhood": "Comparte y encuentra de todo en tu vecindario",
   "Share food, clothing, furniture and more...": "Comparte comida, ropa, muebles y más...",
   "All items deserve a second home.": "Todos los artículos merecen una segunda vida.",
@@ -99,6 +101,7 @@ const es: Dict = {
   "Widen your radius in your profile, or be the first to share something.":
     "Amplía tu radio en tu perfil, o sé el primero en compartir algo.",
   "Examples of items being shared nearby": "Ejemplos de artículos que se comparten cerca",
+  Example: "Ejemplo",
   "Baby stroller": "Carrito de bebé",
   "Coffee maker": "Cafetera",
   "Garden tools": "Herramientas de jardín",
@@ -394,6 +397,8 @@ const es: Dict = {
 
   "free claims used this month": "reclamaciones gratis usadas este mes",
   "Sharing is always free.": "Compartir siempre es gratis.",
+  "Neighbors share everyday things they no longer need — from baby gear to garden tools — so nothing goes to waste.":
+    "Los vecinos comparten cosas cotidianas que ya no necesitan — desde artículos de bebé hasta herramientas de jardín — para que nada se desperdicie.",
   "To keep Hey Neighbor safe, ad-free and encourage reducing waste, a 1 euro fee applies after your first 2 successful pickups.":
     "Para mantener Hey Neighbor seguro, sin anuncios y fomentar la reducción de residuos, se aplica una tarifa de 1 euro después de tus 2 primeras recogidas exitosas.",
   "We are helping people:": "Estamos ayudando a las personas:",

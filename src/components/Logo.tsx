@@ -35,10 +35,18 @@ export function Logo({
         </span>
       </div>
       {showTagline && (
-        <p className={`text-[11px] font-semibold tracking-tight ${taglineColor}`}>
-          {t("Share anything anytime with your closest neighbors")}
-        </p>
+        <>
+          <p className={`text-[11px] font-semibold tracking-tight ${taglineColor}`}>
+            {t("Share anything anytime with your closest neighbors")}
+          </p>
+          <p className={`mt-2 max-w-[19rem] text-center text-[11px] leading-snug ${taglineColor}`}>
+            {t(
+              "Helping neighbors help neighbors. Find and share free food, clothing, and household essentials while reducing waste.",
+            )}
+          </p>
+        </>
       )}
+
     </div>
   );
 }

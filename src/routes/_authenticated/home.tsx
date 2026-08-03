@@ -11,17 +11,18 @@ import {
   Plus,
   PackageCheck,
   ShieldAlert,
-  Baby,
-  Coffee,
-  Shovel,
-  Dog,
-  BookOpen,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { PhoneShell } from "@/components/PhoneShell";
 import { BottomNav } from "@/components/BottomNav";
 import { ListingPhoto } from "@/components/ListingPhoto";
 import { NeighborhoodMap } from "@/components/NeighborhoodMap";
+
+import strollerPhoto from "@/assets/example-stroller.jpg";
+import coffeePhoto from "@/assets/example-coffee-maker.jpg";
+import toolsPhoto from "@/assets/example-garden-tools.jpg";
+import dogFoodPhoto from "@/assets/example-dog-food.jpg";
+import booksPhoto from "@/assets/example-childrens-books.jpg";
 
 import { useUserId } from "@/hooks/useAuth";
 import {
@@ -35,11 +36,11 @@ import {
 } from "@/lib/db";
 
 const EXAMPLE_ITEMS = [
-  { label: "Baby stroller", icon: Baby },
-  { label: "Coffee maker", icon: Coffee },
-  { label: "Garden tools", icon: Shovel },
-  { label: "Dog food", icon: Dog },
-  { label: "Childrens books", icon: BookOpen },
+  { label: "Baby stroller", category: "Item", image: strollerPhoto },
+  { label: "Coffee maker", category: "Item", image: coffeePhoto },
+  { label: "Garden tools", category: "Item", image: toolsPhoto },
+  { label: "Dog food", category: "Unopened Food", image: dogFoodPhoto },
+  { label: "Childrens books", category: "Item", image: booksPhoto },
 ];
 
 export const Route = createFileRoute("/_authenticated/home")({
@@ -180,21 +181,30 @@ function HomeScreen() {
               <p className="text-sm font-bold">
                 {t("Examples of items being shared nearby")}
               </p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <ul className="mt-3 space-y-3">
                 {EXAMPLE_ITEMS.map((item) => (
-                  <div
+                  <li
                     key={item.label}
-                    className="flex items-center gap-2 rounded-xl bg-card p-2.5 shadow-card"
+                    className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card"
                   >
-                    <item.icon
-                      className="size-5 shrink-0 text-primary"
-                      strokeWidth={2.2}
+                    <img
+                      src={item.image}
+                      alt={t(item.label)}
+                      loading="lazy"
+                      className="size-20 shrink-0 rounded-xl object-cover"
                     />
-                    <span className="text-xs font-semibold">{t(item.label)}</span>
-                  </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-bold">{t(item.label)}</p>
+                      <p className="text-xs text-muted-foreground">{t(item.category)}</p>
+                    </div>
+                    <span className="shrink-0 self-start rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      {t("Example")}
+                    </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
+
             <div className="rounded-2xl bg-secondary p-5 text-center">
               <p className="text-sm font-bold">{t("Nothing nearby just yet")}</p>
               <p className="mt-1 text-xs text-muted-foreground">
