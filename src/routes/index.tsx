@@ -95,12 +95,28 @@ function AuthScreen() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/home", replace: true });
+      if (data.session) {
+        navigate({ to: "/home", replace: true });
+        return;
+      }
+      setCheckingSession(false);
     });
   }, [navigate]);
+
+  if (checkingSession) {
+    return (
+      <PhoneShell>
+        <p className="flex flex-1 items-center justify-center py-16 text-sm text-muted-foreground">
+          <Loader2 className="mr-2 size-4 animate-spin" />
+          {t("Loading…")}
+        </p>
+      </PhoneShell>
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

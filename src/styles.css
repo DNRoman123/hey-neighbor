@@ -102,3 +102,18 @@
   font-weight: 700;
   color: var(--color-foreground);
 }
+
+/* iOS zooms the whole page when focusing a field under 16px. Lock text fields
+   at 16px and disable text auto-inflation so the app never resizes on focus. */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
