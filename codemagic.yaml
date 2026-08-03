@@ -7,13 +7,10 @@ workflows:
       app_store_connect: HeyNeighborASC
     environment:
       ios_signing:
-        # Uses the code signing identities already uploaded to Codemagic
-        # (Team settings > Code signing identities), so no profile has to be
-        # created during the build.
-        certificates:
-          - Hey Neighbor Distribution
-        provisioning_profiles:
-          - Hey Neighborbor ios_app_store 1785694858
+        # Match the uploaded signing assets by their verified Apple metadata.
+        # This avoids relying on Codemagic UI reference labels.
+        distribution_type: app_store
+        bundle_identifier: app.lovable.heyneigh
       vars:
         BUNDLE_ID: "app.lovable.heyneigh"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
