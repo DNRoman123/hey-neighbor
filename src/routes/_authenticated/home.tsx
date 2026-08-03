@@ -11,6 +11,11 @@ import {
   Plus,
   PackageCheck,
   ShieldAlert,
+  Baby,
+  Coffee,
+  Shovel,
+  Dog,
+  BookOpen,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { PhoneShell } from "@/components/PhoneShell";
@@ -28,6 +33,14 @@ import {
   formatDistance,
   neighborName,
 } from "@/lib/db";
+
+const EXAMPLE_ITEMS = [
+  { label: "Baby stroller", icon: Baby },
+  { label: "Coffee maker", icon: Coffee },
+  { label: "Garden tools", icon: Shovel },
+  { label: "Dog food", icon: Dog },
+  { label: "Childrens books", icon: BookOpen },
+];
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
@@ -162,17 +175,38 @@ function HomeScreen() {
         )}
 
         {listingsQuery.data?.length === 0 && (
-          <div className="mx-4 rounded-2xl bg-secondary p-5 text-center">
-            <p className="text-sm font-bold">{t("Nothing nearby just yet")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t("Widen your radius in your profile, or be the first to share something.")}
-            </p>
-            <Link
-              to="/share"
-              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground"
-            >
-              <Plus className="size-4" strokeWidth={2.6} /> {t("Share an item")}
-            </Link>
+          <div className="mx-4 space-y-4">
+            <div className="rounded-2xl bg-secondary p-4">
+              <p className="text-sm font-bold">
+                {t("Examples of items being shared nearby")}
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {EXAMPLE_ITEMS.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2 rounded-xl bg-card p-2.5 shadow-card"
+                  >
+                    <item.icon
+                      className="size-5 shrink-0 text-primary"
+                      strokeWidth={2.2}
+                    />
+                    <span className="text-xs font-semibold">{t(item.label)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-secondary p-5 text-center">
+              <p className="text-sm font-bold">{t("Nothing nearby just yet")}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("Widen your radius in your profile, or be the first to share something.")}
+              </p>
+              <Link
+                to="/share"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground"
+              >
+                <Plus className="size-4" strokeWidth={2.6} /> {t("Share an item")}
+              </Link>
+            </div>
           </div>
         )}
 

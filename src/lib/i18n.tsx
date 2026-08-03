@@ -98,6 +98,12 @@ const es: Dict = {
   "Nothing nearby just yet": "Todavía no hay nada cerca",
   "Widen your radius in your profile, or be the first to share something.":
     "Amplía tu radio en tu perfil, o sé el primero en compartir algo.",
+  "Examples of items being shared nearby": "Ejemplos de artículos que se comparten cerca",
+  "Baby stroller": "Carrito de bebé",
+  "Coffee maker": "Cafetera",
+  "Garden tools": "Herramientas de jardín",
+  "Dog food": "Comida para perro",
+  "Childrens books": "Libros infantiles",
   Notifications: "Notificaciones",
   "Open this listing to message the neighbor": "Abrir este anuncio para escribir al vecino",
 
@@ -388,6 +394,14 @@ const es: Dict = {
 
   "free claims used this month": "reclamaciones gratis usadas este mes",
   "Sharing is always free.": "Compartir siempre es gratis.",
+  "To keep Hey Neighbor safe, ad-free and encourage reducing waste, a 1 euro fee applies after your first 2 successful pickups.":
+    "Para mantener Hey Neighbor seguro, sin anuncios y fomentar la reducción de residuos, se aplica una tarifa de 1 euro después de tus 2 primeras recogidas exitosas.",
+  "We are helping people:": "Estamos ayudando a las personas:",
+  "Reduce Waste": "Reduce residuos",
+  "Save Money": "Ahorra dinero",
+  "Meet Neighbors": "Conoce vecinos",
+  "Help Families": "Ayuda a familias",
+  "Build Community": "Construye comunidad",
   "Sharing is always free. As a receiver you get":
     "Compartir siempre es gratis. Como receptor tienes",
   "free claims per month": "reclamaciones gratis al mes",
