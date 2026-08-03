@@ -7,10 +7,11 @@ workflows:
       app_store_connect: HeyNeighborASC
     environment:
       ios_signing:
-        # Match the uploaded signing assets by their verified Apple metadata.
-        # This avoids relying on Codemagic UI reference labels.
-        distribution_type: app_store
-        bundle_identifier: app.lovable.heyneigh
+        # Install the uploaded distribution certificate. The matching profile
+        # is fetched from Apple during the build instead of relying on a stale
+        # or missing Codemagic profile reference.
+        certificates:
+          - Hey Neighbor Distribution
       vars:
         BUNDLE_ID: "app.lovable.heyneigh"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
@@ -29,14 +30,16 @@ workflows:
       - name: Sync Capacitor iOS project
         script: npx cap sync ios
       - name: Configure native Google Sign-In
-        # Google client ids are public identifiers, so the value is read from
-        # the deployed config endpoint when no CI variable is present. This step
-        # never fails the build: Google login simply stays disabled if unset.
+        # Google client ids are public identifiers. A native release must have
+        # the iOS id baked into Info.plist, so fail before archiving if the live
+        # configuration is unavailable or malformed.
         script: |
+          set -e
           CLIENT_ID="${GOOGLE_IOS_CLIENT_ID:-}"
           if [ -z "$CLIENT_ID" ]; then
-            CLIENT_ID="$(curl -fsS https://hey-neighbor-io.lovable.app/api/public/google-config \
-              | sed -n 's/.*"iosClientId":"\([^"]*\)".*/\1/p' || true)"
+            CLIENT_ID="$(curl --fail --silent --show-error --retry 3 \
+              https://hey-neighbor-io.lovable.app/api/public/google-config \
+              | sed -n 's/.*"iosClientId":"\([^"]*\)".*/\1/p')"
           fi
           case "$CLIENT_ID" in
             *.apps.googleusercontent.com)
@@ -52,7 +55,8 @@ workflows:
               echo "Configured native Google Sign-In URL scheme."
               ;;
             *)
-              echo "No iOS Google client id resolved - skipping Google Sign-In configuration."
+              echo "A valid iOS Google client id could not be resolved."
+              exit 1
               ;;
           esac
       - name: Install CocoaPods (if the project uses them)
@@ -67,6 +71,12 @@ workflows:
       - name: Set up signing
         script: |
           set -e
+          # Fetch the exact App Store profile from Apple on every run. There
+          # are valid profiles for this bundle id, but they were not available
+          # under the Codemagic reference previously used by the workflow.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --strict-match-identifier
           xcode-project use-profiles \
             --project "$XCODE_PROJECT" \
             --archive-method app-store \

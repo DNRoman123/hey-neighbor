@@ -74,8 +74,11 @@ export async function signInWithNativeGoogle() {
     provider: "google",
     options: { scopes: ["email", "profile"], forcePrompt: true, nonce },
   });
-  const result = res.result as { idToken?: string | null };
-  const idToken = result?.idToken;
+  const result = res.result;
+  if (result.responseType !== "online") {
+    throw new Error("Google returned an unsupported sign-in response");
+  }
+  const idToken = result.idToken;
   if (!idToken) throw new Error("Google did not return an identity token");
 
   const { data, error } = await supabase.auth.signInWithIdToken({
