@@ -33,7 +33,8 @@ export async function loadGoogleClientIds() {
       iosClientId: ids.iosClientId,
       webClientId: ids.webClientId || ids.iosClientId,
     };
-  } catch {
+  } catch (error) {
+    console.error("Unable to load native Google client configuration", error);
     cached = { iosClientId: "", webClientId: "" };
   }
   return cached;
@@ -55,7 +56,9 @@ function createOidcNonce() {
 export async function signInWithNativeGoogle() {
   const { SocialLogin } = await import("@capgo/capacitor-social-login");
   const ids = await loadGoogleClientIds();
-  if (!ids.iosClientId) throw new Error("Google sign-in is not configured for the app yet");
+  if (!ids.iosClientId || !ids.webClientId) {
+    throw new Error("Google sign-in configuration could not be loaded. Please try again.");
+  }
 
   if (!initialized) {
     await SocialLogin.initialize({
