@@ -177,6 +177,13 @@ function AdminScreen() {
         ))}
       </div>
 
+      <Link
+        to="/admin-stats"
+        className="mx-4 mt-3 block rounded-2xl bg-primary px-4 py-3 text-center text-sm font-bold text-primary-foreground"
+      >
+        Open full statistics
+      </Link>
+
       <div className="mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {tabs.map((t) => (
           <button
