@@ -41,24 +41,60 @@ workflows:
           cd ios/App
           agvtool new-marketing-version "$MARKETING_VERSION"
           agvtool new-version -all "$(date -u +%y%m%d%H%M)"
-      - name: Set up signing (fetch or create App Store profile)
+      - name: Set up signing with a complete certificate
         script: |
-          set -e
+          set -euo pipefail
           keychain initialize
 
           # Make sure the bundle identifier exists on App Store Connect.
           app-store-connect bundle-ids register "$BUNDLE_ID" \
             --name "Hey Neighbor" --platform IOS 2>/dev/null || true
 
-          # Fetch signing files; create the profile (and certificate) when missing.
-          # Retry without --create in case a distribution certificate already exists.
+          # Apple never stores certificate private keys. The current certificate was
+          # created outside this runner, so it cannot be exported as a usable .p12.
+          # Replace it with a certificate whose private key is created on this runner.
+          CERTIFICATE_KEY=/tmp/hey-neighbor-distribution-key.pem
+          openssl genrsa -out "$CERTIFICATE_KEY" 2048
+
+          app-store-connect certificates list \
+            --type DISTRIBUTION IOS_DISTRIBUTION \
+            --json > /tmp/distribution-certificates.json
+
+          python3 - <<'PY' > /tmp/distribution-certificate-ids.txt
+          import json
+
+          with open('/tmp/distribution-certificates.json', encoding='utf-8') as source:
+              payload = json.load(source)
+
+          def visit(value):
+              if isinstance(value, dict):
+                  attributes = value.get('attributes', {})
+                  certificate_type = attributes.get('certificateType') if isinstance(attributes, dict) else None
+                  if value.get('id') and certificate_type in {'DISTRIBUTION', 'IOS_DISTRIBUTION'}:
+                      print(value['id'])
+                  for child in value.values():
+                      visit(child)
+              elif isinstance(value, list):
+                  for child in value:
+                      visit(child)
+
+          visit(payload)
+          PY
+
+          while IFS= read -r certificate_id; do
+            if [ -n "$certificate_id" ]; then
+              app-store-connect certificates delete "$certificate_id" --ignore-not-found
+            fi
+          done < /tmp/distribution-certificate-ids.txt
+
+          # Create a fresh certificate/profile pair and export the certificate with
+          # the matching private key so it can be imported into the build keychain.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --platform IOS \
+            --certificate-key "@file:$CERTIFICATE_KEY" \
+            --delete-stale-profiles \
             --create \
-          || app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --platform IOS
 
           keychain add-certificates
 
