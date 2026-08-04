@@ -13,15 +13,13 @@ workflows:
     integrations:
       app_store_connect: HeyNeighborASC
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: app.lovable.heyneigh
       vars:
         BUNDLE_ID: "app.lovable.heyneigh"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
         EXPORT_OPTIONS_PLIST: "/Users/builder/export_options.plist"
         APP_STORE_APPLE_ID: 19533586859
+        MARKETING_VERSION: "1.1"
       node: 22
       xcode: latest
       cocoapods: default
@@ -38,15 +36,32 @@ workflows:
           if [ -f ios/App/Podfile ]; then
             cd ios/App && pod install
           fi
-      - name: Set build number
+      - name: Set version and build number
         script: |
           cd ios/App
+          agvtool new-marketing-version "$MARKETING_VERSION"
           agvtool new-version -all "$(date -u +%y%m%d%H%M)"
-      - name: Set up signing
+      - name: Set up signing (fetch or create App Store profile)
         script: |
           set -e
-          # The ios_signing environment block fetches and installs the matching
-          # App Store profile and uploaded certificate before scripts run.
+          keychain initialize
+
+          # Make sure the bundle identifier exists on App Store Connect.
+          app-store-connect bundle-ids register "$BUNDLE_ID" \
+            --name "Hey Neighbor" --platform IOS 2>/dev/null || true
+
+          # Fetch signing files; create the profile (and certificate) when missing.
+          # Retry without --create in case a distribution certificate already exists.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --platform IOS \
+            --create \
+          || app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --platform IOS
+
+          keychain add-certificates
+
           xcode-project use-profiles \
             --project "$XCODE_PROJECT" \
             --archive-method app-store \
@@ -68,6 +83,9 @@ workflows:
         auth: integration
         submit_to_testflight: true
         submit_to_app_store: true
+        cancel_previous_submissions: true
+        release_type: AFTER_APPROVAL
+        copyright: "2026 David Roman"
       email:
         recipients:
           - davidnroman@hotmail.com
