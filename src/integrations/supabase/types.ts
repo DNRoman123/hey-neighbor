@@ -417,6 +417,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_message_in_conversation: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
       contains_banned_words: { Args: { _text: string }; Returns: boolean }
       distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }

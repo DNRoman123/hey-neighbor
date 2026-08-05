@@ -302,11 +302,15 @@ function ChatThread() {
           <div className="rounded-2xl bg-primary-soft p-4 text-center">
             <Lock className="mx-auto size-5 text-primary" />
             <p className="mt-2 text-[13px] font-semibold leading-snug text-primary-deep">
-              {t(
-                "Your {limit} free items this month are used. Pay €1.00 for this item to chat with your neighbor — browsing stays free.",
-              ).replace("{limit}", String(FREE_CLAIM_LIMIT))}
+              {chatLock.data.reason === "accept"
+                ? t(
+                    "Accept this item first to chat. Arranging a pickup uses one of your {limit} free items this month.",
+                  ).replace("{limit}", String(FREE_CLAIM_LIMIT))
+                : t(
+                    "Your {limit} free items this month are used. Pay €1.00 for this item to chat with your neighbor — browsing stays free.",
+                  ).replace("{limit}", String(FREE_CLAIM_LIMIT))}
             </p>
-            {chatLock.data.claimId ? (
+            {chatLock.data.reason === "pay" && chatLock.data.claimId ? (
               <Button
                 size="lg"
                 onClick={() =>
@@ -320,19 +324,19 @@ function ChatThread() {
               conversation.data?.listing_id && (
                 <Button
                   size="lg"
-                  variant="outline"
                   onClick={() =>
                     navigate({ to: "/item/$id", params: { id: conversation.data!.listing_id! } })
                   }
-                  className="mt-3 h-12 w-full rounded-xl border-primary/40 text-[15px] font-bold text-primary"
+                  className="mt-3 h-12 w-full rounded-xl text-[15px] font-bold"
                 >
-                  {t("View item")}
+                  {t("Accept item")}
                 </Button>
               )
             )}
           </div>
         </div>
       ) : (
+
         <form onSubmit={submit} className="sticky bottom-0 mt-4 flex items-center gap-2 bg-background px-4 py-3">
           <label
             aria-label={t("Send a photo")}

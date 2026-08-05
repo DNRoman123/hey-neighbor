@@ -158,10 +158,13 @@ function ItemScreen() {
 
   const claim = myClaim.data;
   const nextIsPaid = (freeUsed.data ?? 0) >= FREE_CLAIM_LIMIT;
-  // Over the monthly free limit, receivers can preview items but not chat
-  // until the €1 fee for that claim is paid.
-  const chatLocked =
-    !isMine && nextIsPaid && !(claim?.status === "confirmed" || claim?.status === "completed");
+  // A receiver must first tick the acceptance box (which registers the claim and
+  // uses one of their monthly items) before they can chat or coordinate a pickup.
+  // If the €1 fee is due, chat stays closed until it is paid.
+  const hasAccepted = Boolean(claim?.receiver_accepted_at);
+  const chatAllowed = isMine || (hasAccepted && claim?.status !== "pending_payment");
+  const chatLocked = !chatAllowed;
+
 
   async function handleAccept() {
     if (!userId || !agreed) return;
@@ -389,12 +392,17 @@ function ItemScreen() {
             <div className="rounded-2xl bg-primary-soft p-4 text-center">
               <Lock className="mx-auto size-5 text-primary" />
               <p className="mt-2 text-[13px] font-semibold leading-snug text-primary-deep">
-                {t(
-                  "Your {limit} free items this month are used. Pay €1.00 for this item to chat with your neighbor — browsing stays free.",
-                ).replace("{limit}", String(FREE_CLAIM_LIMIT))}
+                {claim?.status === "pending_payment"
+                  ? t(
+                      "Your {limit} free items this month are used. Pay €1.00 for this item to chat with your neighbor — browsing stays free.",
+                    ).replace("{limit}", String(FREE_CLAIM_LIMIT))
+                  : t(
+                      "Tick the box below and accept this item to unlock the chat. Chatting and arranging a pickup uses one of your monthly items.",
+                    )}
               </p>
             </div>
           ) : (
+
             <Button
               size="lg"
               variant="outline"

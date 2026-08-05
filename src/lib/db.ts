@@ -338,30 +338,37 @@ export async function fetchConversation(conversationId: string, userId: string) 
   };
 }
 
-export type ChatLock = { locked: boolean; claimId: string | null };
+export type ChatLock = {
+  locked: boolean;
+  claimId: string | null;
+  /** "accept" = must tick the acceptance box first, "pay" = €1 fee is due. */
+  reason: "none" | "accept" | "pay";
+};
 
 /**
- * Receivers get 2 free items a month. Once those are used up they can still
- * browse items, but chatting with a giver stays locked until the €1 fee for
- * that claim is paid. Givers are never locked.
+ * Givers are never locked. A receiver must first accept the item (which registers
+ * their claim and uses one of the 2 free items this month) before they can chat or
+ * coordinate a pickup — otherwise they could arrange pickups without ever using a
+ * credit. If the €1 fee is due, chat stays locked until it is paid.
  */
 export async function fetchChatLock(
   listingId: string | null,
   ownerId: string,
   userId: string,
 ): Promise<ChatLock> {
-  if (ownerId === userId) return { locked: false, claimId: null };
+  if (ownerId === userId) return { locked: false, claimId: null, reason: "none" };
+  if (!listingId) return { locked: true, claimId: null, reason: "accept" };
 
-  const used = await fetchFreeClaimsUsed(userId);
-  if (used < FREE_CLAIM_LIMIT) return { locked: false, claimId: null };
-
-  if (!listingId) return { locked: true, claimId: null };
   const claim = await fetchMyClaim(listingId, userId);
-  if (claim && (claim.status === "confirmed" || claim.status === "completed")) {
-    return { locked: false, claimId: claim.id };
+  if (!claim || !claim.receiver_accepted_at) {
+    return { locked: true, claimId: null, reason: "accept" };
   }
-  return { locked: true, claimId: claim?.id ?? null };
+  if (claim.status === "pending_payment") {
+    return { locked: true, claimId: claim.id, reason: "pay" };
+  }
+  return { locked: false, claimId: claim.id, reason: "none" };
 }
+
 
 
 export async function fetchMessages(conversationId: string) {

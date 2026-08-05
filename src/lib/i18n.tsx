@@ -129,6 +129,11 @@ const es: Dict = {
   "View item": "Ver artículo",
   "Your {limit} free items this month are used. Pay €1.00 for this item to chat with your neighbor — browsing stays free.":
     "Ya usaste tus {limit} artículos gratis de este mes. Paga 1,00 € por este artículo para chatear con tu vecino: mirar siempre es gratis.",
+  "Accept this item first to chat. Arranging a pickup uses one of your {limit} free items this month.":
+    "Acepta primero este artículo para chatear. Coordinar una recogida usa uno de tus {limit} artículos gratis de este mes.",
+  "Tick the box below and accept this item to unlock the chat. Chatting and arranging a pickup uses one of your monthly items.":
+    "Marca la casilla de abajo y acepta este artículo para desbloquear el chat. Chatear y coordinar la recogida usa uno de tus artículos del mes.",
+
   "No homemade or opened food may be shared.":
     "No se puede compartir comida casera ni alimentos abiertos.",
   Report: "Reportar",
