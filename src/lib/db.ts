@@ -306,6 +306,12 @@ export async function fetchConversations(userId: string) {
   });
 }
 
+/** Removes a conversation (and its messages) for both neighbors. */
+export async function deleteConversation(conversationId: string) {
+  const { error } = await supabase.from("conversations").delete().eq("id", conversationId);
+  if (error) throw error;
+}
+
 export async function fetchConversation(conversationId: string, userId: string) {
   const { data, error } = await supabase
     .from("conversations")

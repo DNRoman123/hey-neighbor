@@ -6,7 +6,12 @@ import { BottomNav } from "@/components/BottomNav";
 import { TopBar } from "@/components/TopBar";
 import { ListingPhoto } from "@/components/ListingPhoto";
 import { useUserId } from "@/hooks/useAuth";
-import { fetchConversations, neighborName } from "@/lib/db";
+import {
+  FREE_CLAIM_LIMIT,
+  fetchConversations,
+  fetchFreeClaimsUsed,
+  neighborName,
+} from "@/lib/db";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/chat/")({
@@ -34,11 +39,21 @@ function ChatList() {
     queryFn: () => fetchConversations(userId!),
     enabled: Boolean(userId),
   });
+  const freeUsed = useQuery({
+    queryKey: ["free-claims", userId],
+    queryFn: () => fetchFreeClaimsUsed(userId!),
+    enabled: Boolean(userId),
+  });
+  const tokensLeft = Math.max(0, FREE_CLAIM_LIMIT - (freeUsed.data ?? 0));
 
   return (
     <>
       <PhoneShell hasNav>
-        <TopBar title={t("Chat")} subtitle={t("Be kind, be safe")} />
+        <TopBar
+          title={t("Chat")}
+          subtitle={`${tokensLeft} ${t("of")} ${FREE_CLAIM_LIMIT} ${t("free items left this month")}`}
+        />
+
 
         {threads.isPending && (
           <p className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Camera, Send, ShieldCheck, CheckCheck, Loader2, Lock, UserX } from "lucide-react";
+import { Camera, Send, ShieldCheck, CheckCheck, Loader2, Lock, UserX, Trash2, Ban, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { PhoneShell } from "@/components/PhoneShell";
 import { TopBar } from "@/components/TopBar";
@@ -24,8 +24,10 @@ import { uploadPhoto, ExplicitImageError } from "@/lib/photos";
 import {
   FREE_CLAIM_LIMIT,
   blockUser,
+  deleteConversation,
   fetchChatLock,
   fetchConversation,
+  fetchFreeClaimsUsed,
   fetchIsUserBlocked,
   fetchMessages,
   neighborName,
@@ -96,6 +98,28 @@ function ChatThread() {
   });
 
   const isBlocked = Boolean(blockState.data?.blockedByMe || blockState.data?.blockedMe);
+
+  const freeUsed = useQuery({
+    queryKey: ["free-claims", userId],
+    queryFn: () => fetchFreeClaimsUsed(userId!),
+    enabled: Boolean(userId),
+  });
+
+  const isReceiver = Boolean(conversation.data && conversation.data.receiver_id === userId);
+  const tokensLeft = Math.max(0, FREE_CLAIM_LIMIT - (freeUsed.data ?? 0));
+
+  async function handleDeleteChat() {
+    try {
+      await deleteConversation(id);
+      queryClient.invalidateQueries({ queryKey: ["conversations", userId] });
+      toast.success(t("Chat deleted."));
+      navigate({ to: "/chat" });
+    } catch {
+      toast.error(t("Could not delete this chat."));
+    }
+  }
+
+
 
   async function handleBlock() {
     if (!userId || !otherId) return;
@@ -179,27 +203,46 @@ function ChatThread() {
         title={conversation.isPending ? t("Chat") : `${t("Chat with")} ${name}`}
         backTo="/chat"
         right={
-          otherId && !blockState.data?.blockedByMe ? (
+          <div className="flex items-center justify-end gap-3">
+            {otherId && !blockState.data?.blockedByMe ? (
+              <AlertDialog>
+                <AlertDialogTrigger aria-label={t("Block neighbor")} className="flex">
+                  <UserX className="size-5 text-muted-foreground" />
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("Block this neighbor?")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t(
+                        "They won't be able to message you and you won't see each other's items. You can unblock them later from your profile.",
+                      )}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleBlock}>{t("Block")}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : null}
             <AlertDialog>
-              <AlertDialogTrigger aria-label={t("Block neighbor")} className="flex justify-end">
-                <UserX className="size-5 text-muted-foreground" />
+              <AlertDialogTrigger aria-label={t("Delete chat")} className="flex">
+                <Trash2 className="size-5 text-muted-foreground" />
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t("Block this neighbor?")}</AlertDialogTitle>
+                  <AlertDialogTitle>{t("Delete this chat?")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {t(
-                      "They won't be able to message you and you won't see each other's items. You can unblock them later from your profile.",
-                    )}
+                    {t("This removes the conversation and all its messages for both neighbors. This cannot be undone.")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleBlock}>{t("Block")}</AlertDialogAction>
+                  <AlertDialogAction onClick={handleDeleteChat}>{t("Delete")}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          ) : null
+          </div>
         }
       />
 
@@ -239,6 +282,26 @@ function ChatThread() {
             {t("Never share personal or payment information.")}
           </p>
         </div>
+
+        <div className="flex items-start gap-2 rounded-2xl border border-border bg-card p-3">
+          <Ban className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2.4} />
+          <p className="text-[12px] font-semibold leading-snug text-muted-foreground">
+            {t("Items shared here are gifts. Reselling anything you receive is a breach of our terms and can close your account.")}
+          </p>
+        </div>
+
+        {isReceiver && (
+          <div className="flex items-center gap-2 rounded-2xl bg-secondary p-3">
+            <Coins className="size-4 shrink-0 text-primary" strokeWidth={2.4} />
+            <p className="text-[12px] font-semibold leading-snug text-primary-deep">
+              {tokensLeft > 0
+                ? t("{left} of {limit} free items left this month.")
+                    .replace("{left}", String(tokensLeft))
+                    .replace("{limit}", String(FREE_CLAIM_LIMIT))
+                : t("You've used both free items this month. Each extra item costs €1.00.")}
+            </p>
+          </div>
+        )}
 
         {messages.isPending && (
           <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">

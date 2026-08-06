@@ -335,6 +335,19 @@ const es: Dict = {
   "Message not sent. Please try again.": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
   "Could not send that photo.": "No se pudo enviar esa foto.",
   "Be kind, be safe.": "Sé amable, sé seguro.",
+  "Items shared here are gifts. Reselling anything you receive is a breach of our terms and can close your account.":
+    "Los artículos que se comparten aquí son regalos. Revender algo que recibas incumple nuestros términos y puede cerrar tu cuenta.",
+  "{left} of {limit} free items left this month.":
+    "Te quedan {left} de {limit} artículos gratis este mes.",
+  "You've used both free items this month. Each extra item costs €1.00.":
+    "Ya usaste tus dos artículos gratis este mes. Cada artículo extra cuesta 1,00 €.",
+  "Delete chat": "Eliminar chat",
+  "Delete this chat?": "¿Eliminar este chat?",
+  "This removes the conversation and all its messages for both neighbors. This cannot be undone.":
+    "Esto elimina la conversación y todos sus mensajes para ambos vecinos. No se puede deshacer.",
+  "Chat deleted.": "Chat eliminado.",
+  "Could not delete this chat.": "No se pudo eliminar este chat.",
+  "free items left this month": "artículos gratis restantes este mes",
   "Never share personal or payment information.":
     "Nunca compartas información personal ni de pago.",
   "Loading messages…": "Cargando mensajes…",
